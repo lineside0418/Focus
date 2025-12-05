@@ -974,10 +974,11 @@
 
             resetTimer() {
                 this.pauseTimer();
-                this.state.timeLeft = this.state.settings[this.state.mode] * 60;
-                this.state.totalTime = this.state.timeLeft;
-                this.updateDisplay();
-                this.updateRing(1); 
+                this.state.sessionsCompleted = 0;
+                this.renderSessionDots();
+                
+                this.switchMode('focus');
+                
                 this.triggerActionAnimation();
             }
 
@@ -994,13 +995,11 @@
             }
 
             completeTimer(skipped = false) {
-                // 1. Notify for the COMPLETED session
                 if (!skipped) {
                     this.playChime();
-                    this.sendNotification(); // Send notification for the session that just ended
+                    this.sendNotification();
                 }
 
-                // 2. Determine Next Mode
                 let nextMode = 'focus';
                 if (this.state.mode === 'focus') {
                     if(!skipped) {
@@ -1018,20 +1017,15 @@
                     nextMode = 'focus';
                 }
 
-                // 3. Handle Transition
                 const autoStart = this.state.settings.autoStart && !skipped;
 
                 if (autoStart) {
-                    // Seamless Transition
-                    this.switchMode(nextMode, true); // true = don't stop
+                    this.switchMode(nextMode, true); 
                     this.state.endTime = Date.now() + (this.state.timeLeft * 1000);
                     this.triggerActionAnimation();
-                    // Worker continues running
                 } else {
-                    // Manual Stop
                     this.pauseTimer();
                     this.switchMode(nextMode, false);
-                    // UI reset is handled in switchMode(false)
                 }
             }
 
@@ -1114,9 +1108,6 @@
                     const now = new Date();
                     const timeStr = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
                     
-                    // Logic: Notification is sent at the END of a session.
-                    // If mode was 'focus', we just finished focusing -> Break time.
-                    // If mode was 'short'/'long', we just finished break -> Focus time.
                     const texts = TRANSLATIONS[this.state.settings.language];
                     const msg = this.state.mode === 'focus' ? texts.breakTime : texts.focusTime;
                     
