@@ -1,0 +1,21 @@
+{
+    "name": "Focus Flow",
+    "short_name": "Focus",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#000000",
+    "description": "Minimal Pixel Art Pomodoro Timer",
+    "icons": [
+        {
+            "src": "https://cdn-icons-png.flaticon.com/512/109/109613.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "https://cdn-icons-png.flaticon.com/512/109/109613.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
