@@ -495,7 +495,8 @@
                     statusContainer: document.getElementById('status-container'),
                     appHeader: document.getElementById('app-header'),
                     appFooter: document.getElementById('app-footer'),
-                    uiFades: document.querySelectorAll('.fade-enter'),
+                    // Selector excludes status-container so it stays visible
+                    uiFades: document.querySelectorAll('.fade-enter:not(#status-container)'),
                     
                     settingsModal: document.getElementById('settings-modal'),
                     modalContent: document.getElementById('modal-content'),
@@ -920,7 +921,7 @@
                     this.dom.circle.classList.add('text-black', 'dark:text-white');
                 }
 
-                const labels = { focus: 'FOCUS', short: 'BREAK', long: 'RECHARGE' };
+                const labels = { focus: 'FOCUS', short: 'S-BREAK', long: 'L-BREAK' };
                 this.dom.statusBadge.textContent = labels[mode];
 
                 this.updateDisplay();
@@ -1039,7 +1040,9 @@
                 const s = this.state.timeLeft % 60;
                 const timeStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
                 this.dom.timerDisplay.textContent = timeStr;
-                document.title = `${timeStr} - ${this.state.mode.toUpperCase()}`;
+                
+                const modeLabel = this.state.mode === 'focus' ? 'FOCUS' : (this.state.mode === 'short' ? 'S-BREAK' : 'L-BREAK');
+                document.title = `${timeStr} - ${modeLabel}`;
                 
                 const progress = this.state.timeLeft / this.state.totalTime;
                 this.updateRing(progress);
