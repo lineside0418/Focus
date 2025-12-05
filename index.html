@@ -1,812 +1,770 @@
-    <!DOCTYPE html>
-    <html lang="ja">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-        <meta name="theme-color" content="#000000">
-        <title>Focus Flow</title>
-        <meta name="description" content="Minimal Nothing Style Pomodoro Timer">
-        
-        <!-- Link to external manifest file -->
-        <link rel="manifest" href="manifest.json">
-        
-        <!-- Icons (SVG) -->
-        <link rel="icon" type="image/svg+xml" href="favicon.svg">
-        <link rel="apple-touch-icon" href="favicon.svg">
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <title>Focus Flow</title>
+    <meta name="description" content="Minimal Nothing Style Pomodoro Timer">
+    
+    <!-- Link to external manifest file -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons (SVG) -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="favicon.svg">
 
-        <!-- Fonts: Inter for UI -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-        
-        <!-- Libraries -->
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <!-- Fonts: Inter for UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 
-        <script>
-            tailwind.config = {
-                darkMode: 'class',
-                theme: {
-                    extend: {
-                        fontFamily: {
-                            sans: ['Inter', 'sans-serif'],
-                            ndot: ['"Ndot 55"', 'sans-serif'],
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        ndot: ['"Ndot 55"', 'sans-serif'],
+                    },
+                    colors: {
+                        pomo: {
+                            black: '#000000',
+                            dark: '#121212',
+                            gray: '#2C2C2E',
+                            light: '#E5E5EA',
+                            white: '#FFFFFF',
+                            green: '#A7F3D0', 
+                            greenDark: '#059669'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'breathe': 'breathe 4s ease-in-out infinite',
+                        'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                        'fade-out': 'fadeOut 0.5s ease-in-out forwards',
+                        'fade-in': 'fadeIn 0.5s ease-in-out forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-5px)' },
                         },
-                        colors: {
-                            pomo: {
-                                black: '#000000',
-                                dark: '#121212',
-                                gray: '#2C2C2E',
-                                light: '#E5E5EA',
-                                white: '#FFFFFF',
-                                green: '#A7F3D0', 
-                                greenDark: '#059669'
-                            }
+                        breathe: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.6' },
                         },
-                        animation: {
-                            'float': 'float 3s ease-in-out infinite',
-                            'breathe': 'breathe 4s ease-in-out infinite',
-                            'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                        pop: {
+                            '0%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.05)' },
+                            '100%': { transform: 'scale(1)' },
                         },
-                        keyframes: {
-                            float: {
-                                '0%, 100%': { transform: 'translateY(0px)' },
-                                '50%': { transform: 'translateY(-5px)' },
-                            },
-                            breathe: {
-                                '0%, 100%': { opacity: '1' },
-                                '50%': { opacity: '0.7' },
-                            },
-                            pop: {
-                                '0%': { transform: 'scale(1)' },
-                                '50%': { transform: 'scale(1.05)' },
-                                '100%': { transform: 'scale(1)' },
-                            }
+                        fadeOut: {
+                            '0%': { opacity: '1', transform: 'scale(1)' },
+                            '100%': { opacity: '0', transform: 'scale(0.95)', pointerEvents: 'none' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)', pointerEvents: 'auto' },
                         }
                     }
                 }
             }
-        </script>
+        }
+    </script>
 
-        <style>
-            /* Ndot 55 Font Import */
-            @font-face {
-                font-family: "Ndot 55";
-                src: url("https://db.onlinewebfonts.com/t/5f21b8d13dad527377311ec2d5388bdf.eot");
-                src: url("https://db.onlinewebfonts.com/t/5f21b8d13dad527377311ec2d5388bdf.eot?#iefix")format("embedded-opentype"),
-                url("https://db.onlinewebfonts.com/t/5f21b8d13dad527377311ec2d5388bdf.woff2")format("woff2"),
-                url("https://db.onlinewebfonts.com/t/5f21b8d13dad527377311ec2d5388bdf.woff")format("woff"),
-                url("https://db.onlinewebfonts.com/t/5f21b8d13dad527377311ec2d5388bdf.ttf")format("truetype"),
-                url("https://db.onlinewebfonts.com/t/5f21b8d13dad527377311ec2d5388bdf.svg#Ndot 55")format("svg");
-            }
+    <style>
+        /* Ndot 55 Font Import */
+        @font-face {
+            font-family: "Ndot 55";
+            src: url("https://db.onlinewebfonts.com/t/5f21b8d13dad527377311ec2d5388bdf.eot");
+            src: url("https://db.onlinewebfonts.com/t/5f21b8d13dad527377311ec2d5388bdf.eot?#iefix")format("embedded-opentype"),
+            url("https://db.onlinewebfonts.com/t/5f21b8d13dad527377311ec2d5388bdf.woff2")format("woff2"),
+            url("https://db.onlinewebfonts.com/t/5f21b8d13dad527377311ec2d5388bdf.woff")format("woff"),
+            url("https://db.onlinewebfonts.com/t/5f21b8d13dad527377311ec2d5388bdf.ttf")format("truetype"),
+            url("https://db.onlinewebfonts.com/t/5f21b8d13dad527377311ec2d5388bdf.svg#Ndot 55")format("svg");
+        }
 
-            /* Base & Reset */
-            body {
-                -webkit-tap-highlight-color: transparent;
-                -webkit-user-select: none;
-                user-select: none;
-                font-feature-settings: "tnum";
-                font-variant-numeric: tabular-nums;
-                overscroll-behavior-y: none;
-            }
+        /* Base & Reset */
+        body {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+            font-feature-settings: "tnum";
+            font-variant-numeric: tabular-nums;
+            overscroll-behavior-y: none;
+        }
 
-            /* Dot Matrix Background */
-            .bg-matrix {
-                background-color: #f5f5f5;
-                background-image: radial-gradient(#d4d4d4 1.5px, transparent 1.5px);
-                background-size: 24px 24px;
-            }
-            .dark .bg-matrix {
-                background-color: #000000;
-                background-image: radial-gradient(#262626 1.5px, transparent 1.5px);
-                background-size: 24px 24px;
-            }
+        /* Dot Matrix Background */
+        .bg-matrix {
+            background-color: #f5f5f5;
+            background-image: radial-gradient(#d4d4d4 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .dark .bg-matrix {
+            background-color: #000000;
+            background-image: radial-gradient(#262626 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
 
-            /* Scrollbar Hiding */
-            ::-webkit-scrollbar { width: 0px; background: transparent; }
+        /* Scrollbar Hiding */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
 
-            /* Glassmorphism */
-            .glass-panel {
-                background: rgba(255, 255, 255, 0.9);
-                backdrop-filter: blur(20px);
-                -webkit-backdrop-filter: blur(20px);
-                box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
-            }
-            .dark .glass-panel {
-                background: rgba(20, 20, 20, 0.9);
-                box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
-            }
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+        }
+        .dark .glass-panel {
+            background: rgba(15, 15, 15, 0.95);
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
 
-            /* Toggle Switch */
-            .toggle-checkbox:checked { right: 0; border-color: #fff; }
-            
-            /* Drum Picker Styles */
-            .drum-picker {
-                height: 120px;
-                overflow-y: scroll;
-                scroll-snap-type: y mandatory;
-                position: relative;
-                scrollbar-width: none;
-                -ms-overflow-style: none;
-                mask-image: linear-gradient(to bottom, transparent, black 40%, black 60%, transparent);
-                -webkit-mask-image: linear-gradient(to bottom, transparent, black 40%, black 60%, transparent);
-            }
-            .drum-item {
-                height: 40px; display: flex; align-items: center; justify-content: center;
-                scroll-snap-align: center; font-size: 1.25rem; color: gray; transition: all 0.3s ease;
-                font-family: 'Inter', sans-serif;
-                font-weight: 500;
-            }
-            .drum-item.active {
-                color: black; font-size: 1.5rem; font-weight: 700;
-            }
-            .dark .drum-item.active { color: white; }
-            
-            .drum-highlight {
-                position: absolute; top: 50%; left: 0; right: 0; height: 40px;
-                transform: translateY(-50%);
-                border-top: 1px solid rgba(0,0,0,0.1); border-bottom: 1px solid rgba(0,0,0,0.1);
-                pointer-events: none; z-index: 10;
-            }
-            .dark .drum-highlight {
-                border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1);
-            }
+        /* Toggle Switch */
+        .toggle-checkbox:checked { right: 0; border-color: #fff; }
+        
+        /* Drum Picker Styles */
+        .drum-picker {
+            height: 120px;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            position: relative;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            mask-image: linear-gradient(to bottom, transparent, black 40%, black 60%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 40%, black 60%, transparent);
+        }
+        .drum-item {
+            height: 40px; display: flex; align-items: center; justify-content: center;
+            scroll-snap-align: center; font-size: 1.25rem; color: gray; transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+        .drum-item.active {
+            color: black; font-size: 1.5rem; font-weight: 700;
+        }
+        .dark .drum-item.active { color: white; }
+        
+        .drum-highlight {
+            position: absolute; top: 50%; left: 0; right: 0; height: 40px;
+            transform: translateY(-50%);
+            border-top: 1px solid rgba(0,0,0,0.1); border-bottom: 1px solid rgba(0,0,0,0.1);
+            pointer-events: none; z-index: 10;
+        }
+        .dark .drum-highlight {
+            border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
 
-            /* SVG Progress Ring */
-            .progress-ring__circle {
-                transition: stroke-dashoffset 0.5s linear, stroke 0.3s, color 0.5s;
-                transform: rotate(-90deg); transform-origin: 50% 50%;
-            }
-            
-            /* Text Color Transition */
-            .timer-text {
-                transition: color 0.5s;
-            }
+        /* SVG Progress Ring */
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.5s linear, stroke 0.3s, color 0.5s;
+            transform: rotate(-90deg); transform-origin: 50% 50%;
+        }
+        
+        /* Text Color Transition */
+        .timer-text {
+            transition: color 0.5s;
+        }
 
-            /* UI Fade Transition */
-            .ui-fade {
-                transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-            }
-            .ui-hidden {
-                opacity: 0;
-                pointer-events: none;
-                transform: scale(0.95);
-            }
+        /* Better Fade handling using CSS classes managed by JS */
+        .fade-exit {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .fade-enter {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
 
-            /* Play Button Low Contrast Mode */
-            .btn-dimmed {
-                opacity: 0.1 !important;
-                filter: grayscale(100%);
-            }
-            .btn-dimmed:hover {
-                opacity: 0.3 !important;
-            }
-        </style>
-    </head>
-    <body class="bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100 transition-colors duration-500 overflow-hidden h-[100dvh] w-full flex flex-col items-center justify-between font-sans bg-matrix">
+        /* Play Button Low Contrast Mode */
+        .btn-dimmed {
+            opacity: 0.1 !important;
+            filter: grayscale(100%);
+        }
+        .btn-dimmed:hover {
+            opacity: 0.3 !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100 transition-colors duration-500 overflow-hidden h-[100dvh] w-full flex flex-col items-center justify-between font-sans bg-matrix">
 
-        <!-- Header -->
-        <header id="app-header" class="ui-fade w-full px-6 pt-12 pb-4 flex justify-between items-center z-10">
-            <!-- Status Badge -->
-            <div id="status-badge" class="font-ndot text-xs tracking-widest uppercase opacity-80 transition-all bg-white/40 dark:bg-white/5 px-4 py-2 rounded-full backdrop-blur-sm border border-black/5 dark:border-white/5">
+    <!-- Header -->
+    <header class="fade-enter w-full px-6 pt-12 pb-4 flex justify-between items-center z-10">
+        <!-- Info Button (Left) -->
+        <button id="info-btn" class="p-2 opacity-60 hover:opacity-100 transition-opacity rounded-full hover:bg-black/5 dark:hover:bg-white/10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        </button>
+
+        <!-- Settings Button (Right) -->
+        <button id="settings-btn" class="p-2 opacity-60 hover:opacity-100 transition-opacity rounded-full hover:bg-black/5 dark:hover:bg-white/10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+    </header>
+
+    <!-- Main Timer Area -->
+    <main class="flex-1 flex flex-col justify-center items-center w-full relative">
+        
+        <!-- Status Badge (Moved to Center) -->
+        <div id="status-container" class="fade-enter mb-10">
+            <div id="status-badge" class="font-ndot text-sm tracking-[0.2em] uppercase transition-all bg-white/60 dark:bg-white/10 px-6 py-2 rounded-full backdrop-blur-md border border-black/5 dark:border-white/5 shadow-sm">
                 FOCUS
             </div>
-            <button id="settings-btn" class="p-2 opacity-60 hover:opacity-100 transition-opacity rounded-full hover:bg-black/5 dark:hover:bg-white/10">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </div>
+
+        <!-- Timer Ring (Responsive Size) -->
+        <div class="relative w-[75vw] h-[75vw] max-w-80 max-h-80 flex items-center justify-center">
+            <!-- Animate wrapper for pop effect -->
+            <div id="ring-container" class="relative w-full h-full flex items-center justify-center">
+                <svg class="progress-ring w-full h-full" viewBox="0 0 120 120">
+                    <!-- Background Ring (Dotted) -->
+                    <circle id="bg-ring" class="text-gray-200 dark:text-gray-800" stroke-width="1.5" stroke="currentColor" fill="transparent" r="54" cx="60" cy="60" stroke-dasharray="0.5 3" stroke-linecap="round"/>
+                    <!-- Main Progress (Solid Thin) -->
+                    <circle id="progress-ring" class="progress-ring__circle text-black dark:text-white" stroke-width="2.5" stroke-linecap="round" stroke="currentColor" fill="transparent" r="54" cx="60" cy="60" style="stroke-dasharray: 339.292; stroke-dashoffset: 0;"/>
+                </svg>
+
+                <!-- Time Display -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center z-10">
+                    <!-- Ndot 55 Font for Timer -->
+                    <div id="timer-display" class="timer-text font-ndot text-6xl sm:text-7xl tracking-wide tabular-nums text-black dark:text-white select-none origin-center">25:00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="mt-16 flex items-center justify-center w-full max-w-xs relative h-24">
+            
+            <!-- Reset Button -->
+            <button id="reset-btn" class="fade-enter absolute left-4 sm:left-0 p-4 rounded-full text-gray-400 hover:text-black dark:hover:text-white transition-colors hover:bg-black/5 dark:hover:bg-white/10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
             </button>
-        </header>
 
-        <!-- Main Timer Area -->
-        <main class="flex-1 flex flex-col justify-center items-center w-full relative">
-            
-            <!-- Status Icon -->
-            <div id="status-icon-container" class="ui-fade mb-12 opacity-80 animate-float text-black dark:text-white">
-                <!-- Focus: Note and Pen -->
-                <svg id="icon-focus" class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/><path d="M15 5l3 3"/></svg>
-                <!-- Break: Coffee -->
-                <svg id="icon-short" class="w-10 h-10 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-                <!-- Long Break: Coffee -->
-                <svg id="icon-long" class="w-10 h-10 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-            </div>
+            <!-- Main Toggle Button -->
+            <button id="toggle-btn" class="z-20 w-24 h-24 rounded-full bg-black text-white dark:bg-white dark:text-black flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300">
+                <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M5 3L19 12L5 21V3Z" stroke-linejoin="round"/></svg>
+                <svg id="pause-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+            </button>
 
-            <!-- Timer Ring -->
-            <div class="relative w-80 h-80 flex items-center justify-center">
-                <!-- Animate wrapper for pop effect -->
-                <div id="ring-container" class="relative w-full h-full flex items-center justify-center">
-                    <svg class="progress-ring w-full h-full" viewBox="0 0 120 120">
-                        <!-- Background Ring (Dotted) -->
-                        <circle id="bg-ring" class="text-gray-200 dark:text-gray-800" stroke-width="1.5" stroke="currentColor" fill="transparent" r="54" cx="60" cy="60" stroke-dasharray="0.5 3" stroke-linecap="round"/>
-                        <!-- Main Progress (Solid Thin) -->
-                        <circle id="progress-ring" class="progress-ring__circle text-black dark:text-white" stroke-width="2.5" stroke-linecap="round" stroke="currentColor" fill="transparent" r="54" cx="60" cy="60" style="stroke-dasharray: 339.292; stroke-dashoffset: 0;"/>
-                    </svg>
+            <!-- Skip Button -->
+            <button id="skip-btn" class="fade-enter absolute right-4 sm:right-0 p-4 rounded-full text-gray-400 hover:text-black dark:hover:text-white transition-colors hover:bg-black/5 dark:hover:bg-white/10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+            </button>
+        </div>
+    </main>
 
-                    <!-- Time Display -->
-                    <div class="absolute inset-0 flex flex-col items-center justify-center z-10">
-                        <!-- Ndot 55 Font for Timer -->
-                        <div id="timer-display" class="timer-text font-ndot text-7xl tracking-wide tabular-nums text-black dark:text-white select-none origin-center">25:00</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Controls (Center Corrected) -->
-            <div class="mt-16 flex items-center justify-center w-full max-w-xs relative h-24">
-                
-                <!-- Reset Button -->
-                <button id="reset-btn" class="ui-fade absolute left-0 p-4 rounded-full text-gray-400 hover:text-black dark:hover:text-white transition-colors hover:bg-black/5 dark:hover:bg-white/10">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
-                </button>
-
-                <!-- Main Toggle Button -->
-                <button id="toggle-btn" class="z-20 w-24 h-24 rounded-full bg-black text-white dark:bg-white dark:text-black flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300">
-                    <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M5 3L19 12L5 21V3Z" stroke-linejoin="round"/></svg>
-                    <svg id="pause-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-                </button>
-
-                <!-- Skip Button -->
-                <button id="skip-btn" class="ui-fade absolute right-0 p-4 rounded-full text-gray-400 hover:text-black dark:hover:text-white transition-colors hover:bg-black/5 dark:hover:bg-white/10">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
-                </button>
-            </div>
-        </main>
-
-        <!-- Footer Area -->
-        <footer id="app-footer" class="ui-fade w-full pb-8 pt-4 flex flex-col items-center z-10 relative">
-            <!-- Session Indicators -->
-            <div id="session-indicators" class="flex space-x-3 mb-3">
-                <!-- Filled via JS -->
-            </div>
-            <p class="font-ndot text-xs opacity-40 uppercase tracking-widest">Session</p>
-            
-            <!-- Bottom Controls Container -->
-            <div class="absolute bottom-6 left-0 right-0 px-6 flex justify-between items-center pointer-events-none">
-                
-                <!-- Install Button (Left) -->
-                <button id="install-btn" class="pointer-events-auto hidden p-3 rounded-full bg-white/10 dark:bg-white/5 backdrop-blur-md border border-black/10 dark:border-white/10 hover:scale-110 transition-all text-black dark:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                </button>
-
-                <!-- Spacer -->
-                <div class="flex-1"></div>
-
-                <!-- Fullscreen Button (Right) -->
-                <button id="fullscreen-btn" class="pointer-events-auto p-3 rounded-full bg-white/10 dark:bg-white/5 backdrop-blur-md border border-black/10 dark:border-white/10 hover:scale-110 transition-all text-black dark:text-white opacity-60 hover:opacity-100">
-                    <!-- Maximize Icon -->
-                    <svg id="icon-maximize" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
-                    <!-- Minimize Icon -->
-                    <svg id="icon-minimize" class="hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>
-                </button>
-            </div>
-        </footer>
+    <!-- Footer Area -->
+    <footer class="w-full pb-8 pt-4 flex flex-col items-center z-10 relative">
+        <!-- Session Indicators -->
+        <div id="session-indicators" class="flex space-x-3 mb-3">
+            <!-- Filled via JS -->
+        </div>
+        <p class="font-ndot text-xs opacity-40 uppercase tracking-widest">Session</p>
         
-        <!-- Install Help Modal (Sheet Style) -->
-        <div id="install-modal" class="fixed inset-0 z-[60] hidden" role="dialog" aria-modal="true">
-            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="install-backdrop"></div>
+        <!-- Bottom Controls Container -->
+        <div class="fade-enter absolute bottom-6 left-0 right-0 px-6 flex justify-between items-center pointer-events-none">
             
-            <!-- Sheet -->
-            <div id="install-content" class="absolute bottom-0 left-0 right-0 glass-panel rounded-t-[2.5rem] pt-3 pb-8 px-8 transform translate-y-full transition-transform duration-300 ease-out sm:max-w-md sm:mx-auto shadow-2xl overflow-hidden touch-none">
-                
-                <!-- Handle -->
-                <div class="w-full flex justify-center pb-6 pt-2">
-                    <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
-                </div>
+            <!-- Install Button (Left) -->
+            <button id="install-btn" class="pointer-events-auto hidden p-3 rounded-full bg-white/10 dark:bg-white/5 backdrop-blur-md border border-black/10 dark:border-white/10 hover:scale-110 transition-all text-black dark:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
 
-                <h3 class="text-xl font-sans font-bold mb-6 text-center" data-i18n="installApp">Install App</h3>
-                
-                <div id="ios-instructions" class="hidden space-y-4">
-                    <p class="text-sm opacity-80 text-center font-sans" data-i18n="installIOS">To install on iOS:</p>
-                    <div class="flex items-center space-x-3 text-sm p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                        <span class="font-bold font-sans">1.</span>
-                        <span class="font-sans" data-i18n="tapShare">Tap Share button.</span>
-                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-                    </div>
-                    <div class="flex items-center space-x-3 text-sm p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                        <span class="font-bold font-sans">2.</span>
-                        <span class="font-sans" data-i18n="addToHome">Select Add to Home Screen.</span>
-                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                    </div>
-                </div>
-                
-                <div id="pc-instructions" class="hidden text-center">
-                    <p class="text-sm opacity-80 mb-6 font-sans" data-i18n="installPC">Install this timer for the best experience.</p>
-                    <button id="pwa-install-action" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl font-sans hover:opacity-90 transition-opacity" data-i18n="installNow">
-                        INSTALL NOW
-                    </button>
-                </div>
-                
-                <button id="close-install" class="mt-6 w-full py-3 text-sm opacity-50 hover:opacity-100 font-medium font-sans" data-i18n="dismiss">Dismiss</button>
-            </div>
+            <!-- Spacer -->
+            <div class="flex-1"></div>
+
+            <!-- Fullscreen Button (Right) -->
+            <button id="fullscreen-btn" class="pointer-events-auto p-3 rounded-full bg-white/10 dark:bg-white/5 backdrop-blur-md border border-black/10 dark:border-white/10 hover:scale-110 transition-all text-black dark:text-white opacity-60 hover:opacity-100">
+                <svg id="icon-maximize" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+                <svg id="icon-minimize" class="hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>
+            </button>
         </div>
-
-        <!-- Settings Modal (iOS Sheet Style) -->
-        <div id="settings-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
-            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="modal-backdrop"></div>
-            
-            <!-- Sheet -->
-            <div id="modal-content" class="absolute bottom-0 left-0 right-0 glass-panel rounded-t-[2.5rem] pt-3 pb-8 px-8 transform translate-y-full transition-transform duration-300 ease-out sm:max-w-md sm:mx-auto shadow-2xl overflow-hidden touch-none" style="max-height: 85vh;">
-                
-                <!-- Drag Handle -->
-                <div class="w-full flex justify-center pb-6 pt-2" id="drag-handle-area">
-                    <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+    </footer>
+    
+    <!-- Info Modal (Sheet) -->
+    <div id="info-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="info-backdrop"></div>
+        <div id="info-content" class="absolute bottom-0 left-0 right-0 glass-panel rounded-t-[2.5rem] pt-3 pb-8 px-8 transform translate-y-full transition-transform duration-300 ease-out sm:max-w-md sm:mx-auto shadow-2xl overflow-hidden touch-none">
+            <div class="w-full flex justify-center pb-6 pt-2">
+                <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+            </div>
+            <h3 class="text-xl font-bold font-sans mb-6 text-center">Focus Flow</h3>
+            <div class="space-y-4">
+                <a href="https://github.com/lineside0418/Focus/" target="_blank" class="flex items-center p-4 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <svg class="w-6 h-6 mr-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    <span class="font-medium">GitHub Repository</span>
+                </a>
+                <a href="https://twitter.com/lineside0418" target="_blank" class="flex items-center p-4 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <svg class="w-6 h-6 mr-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    <span class="font-medium">Twitter</span>
+                </a>
+                <div class="p-4 text-center opacity-60 text-sm">
+                    <p data-i18n="starText">If you like this app, please give it a star on GitHub! ⭐</p>
+                    <p class="mt-2">© 2025 lineside0418</p>
+                    <p>MIT License</p>
                 </div>
+            </div>
+            <button id="close-info" class="mt-6 w-full py-3 text-sm opacity-50 hover:opacity-100 font-medium font-sans">Close</button>
+        </div>
+    </div>
 
-                <!-- Header Title -->
-                <div class="flex justify-center items-center mb-6 border-b border-black/5 dark:border-white/10 pb-4">
-                    <h2 class="text-lg font-bold font-sans tracking-wide" data-i18n="settings">SETTINGS</h2>
+    <!-- Install Help Modal (Sheet Style) -->
+    <div id="install-modal" class="fixed inset-0 z-[60] hidden" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="install-backdrop"></div>
+        <div id="install-content" class="absolute bottom-0 left-0 right-0 glass-panel rounded-t-[2.5rem] pt-3 pb-8 px-8 transform translate-y-full transition-transform duration-300 ease-out sm:max-w-md sm:mx-auto shadow-2xl overflow-hidden touch-none">
+            <div class="w-full flex justify-center pb-6 pt-2">
+                <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+            </div>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-sans font-bold text-center flex-1" data-i18n="installApp">Install App</h3>
+                <button id="install-lang-toggle" class="text-xs font-bold px-2 py-1 rounded border border-gray-300 dark:border-gray-700">JA/EN</button>
+            </div>
+            <div id="ios-instructions" class="hidden space-y-4">
+                <p class="text-sm opacity-80 text-center font-sans" data-i18n="installIOS">To install on iOS:</p>
+                <div class="flex items-center space-x-3 text-sm p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                    <span class="font-bold font-sans">1.</span>
+                    <span class="font-sans" data-i18n="tapShare">Tap Share button.</span>
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
                 </div>
+                <div class="flex items-center space-x-3 text-sm p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                    <span class="font-bold font-sans">2.</span>
+                    <span class="font-sans" data-i18n="addToHome">Select Add to Home Screen.</span>
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                </div>
+            </div>
+            <div id="pc-instructions" class="hidden text-center">
+                <p class="text-sm opacity-80 mb-6 font-sans" data-i18n="installPC">Install this timer for the best experience.</p>
+                <button id="pwa-install-action" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl font-sans hover:opacity-90 transition-opacity" data-i18n="installNow">
+                    INSTALL NOW
+                </button>
+            </div>
+            <button id="close-install" class="mt-6 w-full py-3 text-sm opacity-50 hover:opacity-100 font-medium font-sans" data-i18n="dismiss">Dismiss</button>
+        </div>
+    </div>
 
-                <div class="space-y-8 h-full overflow-y-auto pb-10 no-scrollbar" style="max-height: 60vh;">
-                    
-                    <!-- Timer Durations -->
-                    <div>
-                        <label class="block text-xs uppercase tracking-wider opacity-60 mb-4 font-sans font-bold" data-i18n="duration">Duration</label>
-                        <div class="grid grid-cols-3 gap-3">
-                            <!-- Focus Picker -->
-                            <div class="flex flex-col items-center">
-                                <span class="text-xs opacity-50 mb-2 font-sans">Focus</span>
-                                <div class="w-full relative bg-white/50 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden">
-                                    <div class="drum-highlight"></div>
-                                    <div class="drum-picker" id="picker-focus"></div>
-                                </div>
-                            </div>
-                            <!-- Short Break Picker -->
-                            <div class="flex flex-col items-center">
-                                <span class="text-xs opacity-50 mb-2 font-sans">Short</span>
-                                <div class="w-full relative bg-white/50 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden">
-                                    <div class="drum-highlight"></div>
-                                    <div class="drum-picker" id="picker-short"></div>
-                                </div>
-                            </div>
-                            <!-- Long Break Picker -->
-                            <div class="flex flex-col items-center">
-                                <span class="text-xs opacity-50 mb-2 font-sans">Long</span>
-                                <div class="w-full relative bg-white/50 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden">
-                                    <div class="drum-highlight"></div>
-                                    <div class="drum-picker" id="picker-long"></div>
-                                </div>
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="modal-backdrop"></div>
+        <div id="modal-content" class="absolute bottom-0 left-0 right-0 glass-panel rounded-t-[2.5rem] pt-3 pb-8 px-8 transform translate-y-full transition-transform duration-300 ease-out sm:max-w-md sm:mx-auto shadow-2xl overflow-hidden touch-none" style="max-height: 85vh;">
+            <div class="w-full flex justify-center pb-6 pt-2" id="drag-handle-area">
+                <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+            </div>
+            <div class="flex justify-center items-center mb-6 border-b border-black/5 dark:border-white/10 pb-4">
+                <h2 class="text-lg font-bold font-sans tracking-wide" data-i18n="settings">SETTINGS</h2>
+            </div>
+            <div class="space-y-8 h-full overflow-y-auto pb-10 no-scrollbar" style="max-height: 60vh;">
+                <div>
+                    <label class="block text-xs uppercase tracking-wider opacity-60 mb-4 font-sans font-bold" data-i18n="duration">Duration</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="flex flex-col items-center"><span class="text-xs opacity-50 mb-2 font-sans">Focus</span><div class="w-full relative bg-white/50 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden"><div class="drum-highlight"></div><div class="drum-picker" id="picker-focus"></div></div></div>
+                        <div class="flex flex-col items-center"><span class="text-xs opacity-50 mb-2 font-sans">Short</span><div class="w-full relative bg-white/50 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden"><div class="drum-highlight"></div><div class="drum-picker" id="picker-short"></div></div></div>
+                        <div class="flex flex-col items-center"><span class="text-xs opacity-50 mb-2 font-sans">Long</span><div class="w-full relative bg-white/50 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden"><div class="drum-highlight"></div><div class="drum-picker" id="picker-long"></div></div></div>
+                    </div>
+                </div>
+                <div class="pt-6 border-t border-black/5 dark:border-white/5">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-sm font-medium font-sans" data-i18n="enableLongBreak">Enable Long Break</span>
+                        <button id="longbreak-toggle" class="relative inline-flex items-center h-7 rounded-full w-12 bg-gray-200 dark:bg-gray-800 transition-colors"><span class="translate-x-1 inline-block w-5 h-5 transform bg-white rounded-full transition-transform shadow-sm"></span></button>
+                    </div>
+                    <div id="interval-settings" class="opacity-100 transition-opacity duration-300">
+                        <div class="flex justify-between items-center bg-white/40 dark:bg-white/5 p-3 rounded-2xl">
+                            <span class="text-sm opacity-80 pl-2 font-sans" data-i18n="interval">Interval</span>
+                            <div class="flex items-center space-x-4">
+                                <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10" onclick="app.adjustInterval(-1)">-</button>
+                                <span id="interval-display" class="w-6 text-center font-sans font-bold text-lg">4</span>
+                                <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10" onclick="app.adjustInterval(1)">+</button>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Long Break Interval -->
-                    <div class="pt-6 border-t border-black/5 dark:border-white/5">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="text-sm font-medium font-sans" data-i18n="enableLongBreak">Enable Long Break</span>
-                            <button id="longbreak-toggle" class="relative inline-flex items-center h-7 rounded-full w-12 bg-gray-200 dark:bg-gray-800 transition-colors">
-                                <span class="translate-x-1 inline-block w-5 h-5 transform bg-white rounded-full transition-transform shadow-sm"></span>
-                            </button>
-                        </div>
-                        
-                        <div id="interval-settings" class="opacity-100 transition-opacity duration-300">
-                            <div class="flex justify-between items-center bg-white/40 dark:bg-white/5 p-3 rounded-2xl">
-                                <span class="text-sm opacity-80 pl-2 font-sans" data-i18n="interval">Interval</span>
-                                <div class="flex items-center space-x-4">
-                                    <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10" onclick="app.adjustInterval(-1)">-</button>
-                                    <span id="interval-display" class="w-6 text-center font-sans font-bold text-lg">4</span>
-                                    <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10" onclick="app.adjustInterval(1)">+</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Other Toggles -->
-                    <div class="pt-6 border-t border-black/5 dark:border-white/5 space-y-5">
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm font-medium font-sans" data-i18n="darkMode">Dark Mode</span>
-                            <button id="theme-toggle" class="relative inline-flex items-center h-7 rounded-full w-12 bg-gray-200 dark:bg-gray-800 transition-colors">
-                                <span class="translate-x-1 inline-block w-5 h-5 transform bg-white rounded-full transition-transform dark:translate-x-6 shadow-sm"></span>
-                            </button>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm font-medium font-sans" data-i18n="soundEffects">Sound Effects</span>
-                            <button id="sound-toggle" class="relative inline-flex items-center h-7 rounded-full w-12 bg-gray-200 dark:bg-gray-800 transition-colors">
-                                <span class="translate-x-6 inline-block w-5 h-5 transform bg-white rounded-full transition-transform shadow-sm"></span>
-                            </button>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm font-medium font-sans" data-i18n="autoStartNext">Auto Start Next</span>
-                            <button id="autostart-toggle" class="relative inline-flex items-center h-7 rounded-full w-12 bg-gray-200 dark:bg-gray-800 transition-colors">
-                                <span class="translate-x-1 inline-block w-5 h-5 transform bg-white rounded-full transition-transform shadow-sm"></span>
-                            </button>
-                        </div>
-                        <!-- Language Toggle -->
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm font-medium font-sans" data-i18n="language">Language (JA)</span>
-                            <button id="lang-toggle" class="relative inline-flex items-center h-7 rounded-full w-12 bg-gray-200 dark:bg-gray-800 transition-colors">
-                                <span class="translate-x-1 inline-block w-5 h-5 transform bg-white rounded-full transition-transform shadow-sm"></span>
-                            </button>
-                        </div>
-                    </div>
+                </div>
+                <div class="pt-6 border-t border-black/5 dark:border-white/5 space-y-5">
+                    <div class="flex justify-between items-center"><span class="text-sm font-medium font-sans" data-i18n="enableNotify">Notifications</span><button id="notify-toggle" class="relative inline-flex items-center h-7 rounded-full w-12 bg-gray-200 dark:bg-gray-800 transition-colors"><span class="translate-x-1 inline-block w-5 h-5 transform bg-white rounded-full transition-transform shadow-sm"></span></button></div>
+                    <div class="flex justify-between items-center"><span class="text-sm font-medium font-sans" data-i18n="darkMode">Dark Mode</span><button id="theme-toggle" class="relative inline-flex items-center h-7 rounded-full w-12 bg-gray-200 dark:bg-gray-800 transition-colors"><span class="translate-x-1 inline-block w-5 h-5 transform bg-white rounded-full transition-transform dark:translate-x-6 shadow-sm"></span></button></div>
+                    <div class="flex justify-between items-center"><span class="text-sm font-medium font-sans" data-i18n="soundEffects">Sound Effects</span><button id="sound-toggle" class="relative inline-flex items-center h-7 rounded-full w-12 bg-gray-200 dark:bg-gray-800 transition-colors"><span class="translate-x-6 inline-block w-5 h-5 transform bg-white rounded-full transition-transform shadow-sm"></span></button></div>
+                    <div class="flex justify-between items-center"><span class="text-sm font-medium font-sans" data-i18n="autoStartNext">Auto Start Next</span><button id="autostart-toggle" class="relative inline-flex items-center h-7 rounded-full w-12 bg-gray-200 dark:bg-gray-800 transition-colors"><span class="translate-x-1 inline-block w-5 h-5 transform bg-white rounded-full transition-transform shadow-sm"></span></button></div>
+                    <div class="flex justify-between items-center"><span class="text-sm font-medium font-sans" data-i18n="language">Language (JA)</span><button id="lang-toggle" class="relative inline-flex items-center h-7 rounded-full w-12 bg-gray-200 dark:bg-gray-800 transition-colors"><span class="translate-x-1 inline-block w-5 h-5 transform bg-white rounded-full transition-transform shadow-sm"></span></button></div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <script>
-            const TRANSLATIONS = {
-                en: {
-                    settings: "SETTINGS",
-                    done: "DONE",
-                    duration: "Duration",
-                    enableLongBreak: "Enable Long Break",
-                    interval: "Interval",
-                    darkMode: "Dark Mode",
-                    soundEffects: "Sound Effects",
-                    autoStartNext: "Auto Start Next",
-                    language: "Language (JA)",
-                    installApp: "Install App",
-                    installIOS: "To install on iOS:",
-                    tapShare: "Tap Share button.",
-                    addToHome: "Select Add to Home Screen.",
-                    installPC: "Install this timer for the best experience.",
-                    installNow: "INSTALL NOW",
-                    dismiss: "Dismiss"
-                },
-                ja: {
-                    settings: "SETTINGS",
-                    done: "完了",
-                    duration: "時間設定",
-                    enableLongBreak: "長い休憩を有効化",
-                    interval: "間隔",
-                    darkMode: "ダークモード",
-                    soundEffects: "サウンド効果",
-                    autoStartNext: "自動で開始",
-                    language: "日本語 (JA)",
-                    installApp: "アプリをインストール",
-                    installIOS: "iOSでのインストール方法:",
-                    tapShare: "共有ボタンをタップします。",
-                    addToHome: "「ホーム画面に追加」を選択します。",
-                    installPC: "アプリとしてインストールすると便利です。",
-                    installNow: "インストール",
-                    dismiss: "閉じる"
+    <script>
+        const TRANSLATIONS = {
+            en: {
+                settings: "SETTINGS",
+                done: "DONE",
+                duration: "Duration",
+                enableLongBreak: "Enable Long Break",
+                interval: "Interval",
+                enableNotify: "Notifications",
+                darkMode: "Dark Mode",
+                soundEffects: "Sound Effects",
+                autoStartNext: "Auto Start Next",
+                language: "Language (JA)",
+                installApp: "Install App",
+                installIOS: "To install on iOS:",
+                tapShare: "Tap Share button.",
+                addToHome: "Select Add to Home Screen.",
+                installPC: "Install this timer for the best experience.",
+                installNow: "INSTALL NOW",
+                dismiss: "Dismiss",
+                starText: "If you like this app, please give it a star on GitHub! ⭐",
+                focusTime: "Time to focus!",
+                breakTime: "Time for a break!"
+            },
+            ja: {
+                settings: "SETTINGS",
+                done: "完了",
+                duration: "時間設定",
+                enableLongBreak: "長い休憩を有効化",
+                interval: "間隔",
+                enableNotify: "通知を許可",
+                darkMode: "ダークモード",
+                soundEffects: "サウンド効果",
+                autoStartNext: "自動で開始",
+                language: "日本語 (JA)",
+                installApp: "アプリをインストール",
+                installIOS: "iOSでのインストール方法:",
+                tapShare: "共有ボタンをタップします。",
+                addToHome: "「ホーム画面に追加」を選択します。",
+                installPC: "アプリとしてインストールすると便利です。",
+                installNow: "インストール",
+                dismiss: "閉じる",
+                starText: "もし気に入ったら、GitHubでスターを付けてね！ ⭐",
+                focusTime: "集中の時間だよ！",
+                breakTime: "休憩の時間だよ！"
+            }
+        };
+
+        // Web Worker for Background Timer
+        const workerBlob = new Blob([`
+            let timerId = null;
+            self.onmessage = function(e) {
+                if (e.data.command === 'start') {
+                    if (timerId) clearInterval(timerId);
+                    timerId = setInterval(() => {
+                        self.postMessage('tick');
+                    }, 100); 
+                } else if (e.data.command === 'stop') {
+                    if (timerId) clearInterval(timerId);
+                    timerId = null;
                 }
             };
+        `], { type: 'application/javascript' });
+        const workerUrl = URL.createObjectURL(workerBlob);
 
-            class PomodoroApp {
-                constructor() {
-                    this.deferredPrompt = null;
-                    this.state = {
-                        mode: 'focus', 
-                        timeLeft: 25 * 60,
-                        totalTime: 25 * 60,
-                        isRunning: false,
-                        endTime: null,
-                        sessionsCompleted: 0,
-                        settings: {
-                            focus: 25, short: 5, long: 15,
-                            darkMode: true, sound: true, autoStart: false,
-                            enableLongBreak: true, longBreakInterval: 4,
-                            language: 'en'
-                        }
-                    };
-
-                    this.dom = {
-                        timerDisplay: document.getElementById('timer-display'),
-                        ringContainer: document.getElementById('ring-container'),
-                        circle: document.getElementById('progress-ring'),
-                        toggleBtn: document.getElementById('toggle-btn'),
-                        resetBtn: document.getElementById('reset-btn'),
-                        skipBtn: document.getElementById('skip-btn'),
-                        playIcon: document.getElementById('play-icon'),
-                        pauseIcon: document.getElementById('pause-icon'),
-                        statusBadge: document.getElementById('status-badge'),
-                        statusIcons: {
-                            focus: document.getElementById('icon-focus'),
-                            short: document.getElementById('icon-short'),
-                            long: document.getElementById('icon-long')
-                        },
-                        statusIconContainer: document.getElementById('status-icon-container'),
-                        appHeader: document.getElementById('app-header'),
-                        appFooter: document.getElementById('app-footer'),
-                        uiFades: document.querySelectorAll('.ui-fade'),
-                        
-                        // Settings
-                        settingsModal: document.getElementById('settings-modal'),
-                        modalContent: document.getElementById('modal-content'),
-                        modalBackdrop: document.getElementById('modal-backdrop'),
-                        settingsBtn: document.getElementById('settings-btn'),
-                        
-                        // Install
-                        installBtn: document.getElementById('install-btn'),
-                        installModal: document.getElementById('install-modal'),
-                        installContent: document.getElementById('install-content'),
-                        installBackdrop: document.getElementById('install-backdrop'),
-                        closeInstall: document.getElementById('close-install'),
-                        iosInstructions: document.getElementById('ios-instructions'),
-                        pcInstructions: document.getElementById('pc-instructions'),
-                        pwaInstallAction: document.getElementById('pwa-install-action'),
-                        
-                        sessionIndicators: document.getElementById('session-indicators'),
-                        intervalDisplay: document.getElementById('interval-display'),
-                        intervalContainer: document.getElementById('interval-settings'),
-                        
-                        fullscreenBtn: document.getElementById('fullscreen-btn'),
-                        iconMaximize: document.getElementById('icon-maximize'),
-                        iconMinimize: document.getElementById('icon-minimize'),
-                        toggles: {
-                            theme: document.getElementById('theme-toggle'),
-                            sound: document.getElementById('sound-toggle'),
-                            autoStart: document.getElementById('autostart-toggle'),
-                            longBreak: document.getElementById('longbreak-toggle'),
-                            lang: document.getElementById('lang-toggle')
-                        }
-                    };
-
-                    this.radius = this.dom.circle.r.baseVal.value;
-                    this.circumference = this.radius * 2 * Math.PI;
-                    this.dom.circle.style.strokeDasharray = `${this.circumference} ${this.circumference}`;
-
-                    this.loadSettings();
-                    this.initEventListeners();
-                    this.initDrumPickers(); 
-                    this.initModalGestures(); 
-                    this.renderSessionDots();
-                    this.initPWAInstall();
-                    this.initFullscreen();
-                    
-                    this.updateTheme();
-                    this.updateLanguage();
-                    this.switchMode('focus');
-                    this.requestNotificationPermission();
-                }
-
-                loadSettings() {
-                    const saved = localStorage.getItem('pomodoro-settings-v3');
-                    if (saved) {
-                        this.state.settings = { ...this.state.settings, ...JSON.parse(saved) };
-                        this.updateToggleUI(this.dom.toggles.theme, this.state.settings.darkMode);
-                        this.updateToggleUI(this.dom.toggles.sound, this.state.settings.sound);
-                        this.updateToggleUI(this.dom.toggles.autoStart, this.state.settings.autoStart);
-                        this.updateToggleUI(this.dom.toggles.longBreak, this.state.settings.enableLongBreak);
-                        this.updateToggleUI(this.dom.toggles.lang, this.state.settings.language === 'ja');
-                        this.dom.intervalDisplay.textContent = this.state.settings.longBreakInterval;
-                        this.toggleIntervalVisibility();
+        class PomodoroApp {
+            constructor() {
+                this.deferredPrompt = null;
+                this.worker = new Worker(workerUrl);
+                this.state = {
+                    mode: 'focus', 
+                    timeLeft: 25 * 60,
+                    totalTime: 25 * 60,
+                    isRunning: false,
+                    endTime: null,
+                    sessionsCompleted: 0,
+                    settings: {
+                        focus: 25, short: 5, long: 15,
+                        darkMode: true, sound: true, autoStart: false,
+                        enableLongBreak: true, longBreakInterval: 4,
+                        language: 'en',
+                        notifications: false
                     }
+                };
+
+                this.dom = {
+                    timerDisplay: document.getElementById('timer-display'),
+                    ringContainer: document.getElementById('ring-container'),
+                    circle: document.getElementById('progress-ring'),
+                    toggleBtn: document.getElementById('toggle-btn'),
+                    resetBtn: document.getElementById('reset-btn'),
+                    skipBtn: document.getElementById('skip-btn'),
+                    playIcon: document.getElementById('play-icon'),
+                    pauseIcon: document.getElementById('pause-icon'),
+                    statusBadge: document.getElementById('status-badge'),
+                    statusContainer: document.getElementById('status-container'),
+                    appHeader: document.getElementById('app-header'),
+                    appFooter: document.getElementById('app-footer'),
+                    uiFades: document.querySelectorAll('.fade-enter'),
+                    
+                    settingsModal: document.getElementById('settings-modal'),
+                    modalContent: document.getElementById('modal-content'),
+                    modalBackdrop: document.getElementById('modal-backdrop'),
+                    settingsBtn: document.getElementById('settings-btn'),
+                    
+                    infoModal: document.getElementById('info-modal'),
+                    infoContent: document.getElementById('info-content'),
+                    infoBackdrop: document.getElementById('info-backdrop'),
+                    infoBtn: document.getElementById('info-btn'),
+                    closeInfo: document.getElementById('close-info'),
+                    
+                    installBtn: document.getElementById('install-btn'),
+                    installModal: document.getElementById('install-modal'),
+                    installContent: document.getElementById('install-content'),
+                    installBackdrop: document.getElementById('install-backdrop'),
+                    closeInstall: document.getElementById('close-install'),
+                    installLangToggle: document.getElementById('install-lang-toggle'),
+                    iosInstructions: document.getElementById('ios-instructions'),
+                    pcInstructions: document.getElementById('pc-instructions'),
+                    pwaInstallAction: document.getElementById('pwa-install-action'),
+                    
+                    sessionIndicators: document.getElementById('session-indicators'),
+                    intervalDisplay: document.getElementById('interval-display'),
+                    intervalContainer: document.getElementById('interval-settings'),
+                    
+                    fullscreenBtn: document.getElementById('fullscreen-btn'),
+                    iconMaximize: document.getElementById('icon-maximize'),
+                    iconMinimize: document.getElementById('icon-minimize'),
+                    toggles: {
+                        theme: document.getElementById('theme-toggle'),
+                        sound: document.getElementById('sound-toggle'),
+                        autoStart: document.getElementById('autostart-toggle'),
+                        longBreak: document.getElementById('longbreak-toggle'),
+                        lang: document.getElementById('lang-toggle'),
+                        notify: document.getElementById('notify-toggle')
+                    }
+                };
+
+                this.radius = this.dom.circle.r.baseVal.value;
+                this.circumference = this.radius * 2 * Math.PI;
+                this.dom.circle.style.strokeDasharray = `${this.circumference} ${this.circumference}`;
+
+                this.loadSettings();
+                this.initEventListeners();
+                this.initDrumPickers(); 
+                this.initModalGestures(); 
+                this.renderSessionDots();
+                this.initPWAInstall();
+                this.initFullscreen();
+                this.initWorker();
+                
+                this.updateTheme();
+                this.updateLanguage();
+                this.switchMode('focus');
+                
+                if (Notification.permission === 'granted') {
+                    this.state.settings.notifications = true;
+                    this.updateToggleUI(this.dom.toggles.notify, true);
                 }
+            }
 
-                saveSettings() {
-                    localStorage.setItem('pomodoro-settings-v3', JSON.stringify(this.state.settings));
-                }
-
-                initDrumPickers() {
-                    const setupPicker = (elementId, settingKey) => {
-                        const container = document.getElementById(elementId);
-                        const padding = document.createElement('div');
-                        padding.style.height = '40px'; 
-                        container.appendChild(padding);
-
-                        for (let i = 1; i <= 60; i++) {
-                            const div = document.createElement('div');
-                            div.className = `drum-item ${i === this.state.settings[settingKey] ? 'active' : ''}`;
-                            div.textContent = i;
-                            div.dataset.value = i;
-                            container.appendChild(div);
+            initWorker() {
+                this.worker.onmessage = (e) => {
+                    if (e.data === 'tick' && this.state.isRunning) {
+                        const now = Date.now();
+                        const remaining = Math.ceil((this.state.endTime - now) / 1000);
+                        if (remaining <= 0) {
+                            this.completeTimer();
+                        } else {
+                            if (remaining !== this.state.timeLeft) {
+                                this.state.timeLeft = remaining;
+                                this.updateDisplay();
+                            }
                         }
-                        const paddingBottom = document.createElement('div');
-                        paddingBottom.style.height = '40px';
-                        container.appendChild(paddingBottom);
+                    }
+                };
+            }
 
-                        // Scrolling logic
-                        let isScrolling;
-                        container.addEventListener('scroll', () => {
-                            window.clearTimeout(isScrolling);
-                            isScrolling = setTimeout(() => {
-                                const center = container.scrollTop + 40 + 20; 
-                                const items = container.querySelectorAll('.drum-item');
-                                let closest = null;
-                                let minDiff = Infinity;
+            loadSettings() {
+                const saved = localStorage.getItem('pomodoro-settings-v3');
+                if (saved) {
+                    this.state.settings = { ...this.state.settings, ...JSON.parse(saved) };
+                    this.updateToggleUI(this.dom.toggles.theme, this.state.settings.darkMode);
+                    this.updateToggleUI(this.dom.toggles.sound, this.state.settings.sound);
+                    this.updateToggleUI(this.dom.toggles.autoStart, this.state.settings.autoStart);
+                    this.updateToggleUI(this.dom.toggles.longBreak, this.state.settings.enableLongBreak);
+                    this.updateToggleUI(this.dom.toggles.lang, this.state.settings.language === 'ja');
+                    this.dom.intervalDisplay.textContent = this.state.settings.longBreakInterval;
+                    this.toggleIntervalVisibility();
+                }
+            }
 
-                                items.forEach(item => {
-                                    const itemCenter = item.offsetTop + 20;
-                                    const diff = Math.abs(center - itemCenter);
-                                    if (diff < minDiff) {
-                                        minDiff = diff;
-                                        closest = item;
-                                    }
-                                });
+            saveSettings() {
+                localStorage.setItem('pomodoro-settings-v3', JSON.stringify(this.state.settings));
+            }
 
-                                if (closest) {
-                                    items.forEach(i => i.classList.remove('active'));
-                                    closest.classList.add('active');
-                                    const newValue = parseInt(closest.dataset.value);
-                                    
-                                    if (this.state.settings[settingKey] !== newValue) {
-                                        this.state.settings[settingKey] = newValue;
-                                        this.saveSettings();
-                                        if (!this.state.isRunning && this.state.mode === settingKey) {
-                                            this.resetTimer(); 
-                                        }
+            initDrumPickers() {
+                const setupPicker = (elementId, settingKey) => {
+                    const container = document.getElementById(elementId);
+                    const padding = document.createElement('div');
+                    padding.style.height = '40px'; 
+                    container.appendChild(padding);
+
+                    for (let i = 1; i <= 60; i++) {
+                        const div = document.createElement('div');
+                        div.className = `drum-item ${i === this.state.settings[settingKey] ? 'active' : ''}`;
+                        div.textContent = i;
+                        div.dataset.value = i;
+                        container.appendChild(div);
+                    }
+                    const paddingBottom = document.createElement('div');
+                    paddingBottom.style.height = '40px';
+                    container.appendChild(paddingBottom);
+
+                    let isScrolling;
+                    container.addEventListener('scroll', () => {
+                        window.clearTimeout(isScrolling);
+                        isScrolling = setTimeout(() => {
+                            const center = container.scrollTop + 40 + 20; 
+                            const items = container.querySelectorAll('.drum-item');
+                            let closest = null;
+                            let minDiff = Infinity;
+
+                            items.forEach(item => {
+                                const itemCenter = item.offsetTop + 20;
+                                const diff = Math.abs(center - itemCenter);
+                                if (diff < minDiff) {
+                                    minDiff = diff;
+                                    closest = item;
+                                }
+                            });
+
+                            if (closest) {
+                                items.forEach(i => i.classList.remove('active'));
+                                closest.classList.add('active');
+                                const newValue = parseInt(closest.dataset.value);
+                                
+                                if (this.state.settings[settingKey] !== newValue) {
+                                    this.state.settings[settingKey] = newValue;
+                                    this.saveSettings();
+                                    if (!this.state.isRunning && this.state.mode === settingKey) {
+                                        this.resetTimer(); 
                                     }
                                 }
-                            }, 50);
-                        });
-                    };
-
-                    setupPicker('picker-focus', 'focus');
-                    setupPicker('picker-short', 'short');
-                    setupPicker('picker-long', 'long');
-                }
-                
-                scrollToCurrentPickers() {
-                    ['focus', 'short', 'long'].forEach(key => {
-                        const container = document.getElementById(`picker-${key}`);
-                        const val = this.state.settings[key];
-                        const item = container.querySelector(`.drum-item[data-value="${val}"]`);
-                        if(item) {
-                            container.scrollTop = item.offsetTop - 40;
-                        }
-                    });
-                }
-
-                initModalGestures() {
-                    this.setupHammer(this.dom.modalContent, () => this.closeSettings());
-                    this.setupHammer(this.dom.installContent, () => this.closeInstallModal());
-                }
-
-                setupHammer(element, closeCallback) {
-                    const mc = new Hammer(element);
-                    mc.get('pan').set({ direction: Hammer.DIRECTION_VERTICAL });
-
-                    let currentY = 0;
-
-                    mc.on("panstart", () => {
-                        element.style.transition = 'none';
-                    });
-
-                    mc.on("panmove", (e) => {
-                        if (e.deltaY > 0) { // Only allow dragging down
-                            currentY = e.deltaY;
-                            element.style.transform = `translateY(${currentY}px)`;
-                        }
-                    });
-
-                    mc.on("panend", (e) => {
-                        element.style.transition = 'transform 0.3s ease-out';
-                        if (e.deltaY > 100 || e.velocityY > 0.5) {
-                            closeCallback();
-                            setTimeout(() => { element.style.transform = ''; }, 10);
-                        } else {
-                            element.style.transform = 'translateY(0px)';
-                        }
-                    });
-                }
-
-                adjustInterval(delta) {
-                    let newVal = this.state.settings.longBreakInterval + delta;
-                    if (newVal < 1) newVal = 1;
-                    if (newVal > 10) newVal = 10;
-                    this.state.settings.longBreakInterval = newVal;
-                    this.dom.intervalDisplay.textContent = newVal;
-                    this.saveSettings();
-                    this.renderSessionDots();
-                }
-
-                toggleIntervalVisibility() {
-                    this.dom.intervalContainer.style.opacity = this.state.settings.enableLongBreak ? '1' : '0.4';
-                    this.dom.intervalContainer.style.pointerEvents = this.state.settings.enableLongBreak ? 'auto' : 'none';
-                }
-
-                initEventListeners() {
-                    this.dom.toggleBtn.addEventListener('click', () => this.toggleTimer());
-                    this.dom.resetBtn.addEventListener('click', () => this.resetTimer());
-                    this.dom.skipBtn.addEventListener('click', () => this.skipTimer());
-
-                    this.dom.settingsBtn.addEventListener('click', () => this.openSettings());
-                    this.dom.modalBackdrop.addEventListener('click', () => this.closeSettings());
-
-                    // Install Modal
-                    this.dom.installBtn.addEventListener('click', () => this.openInstallModal());
-                    this.dom.closeInstall.addEventListener('click', () => this.closeInstallModal());
-                    this.dom.installBackdrop.addEventListener('click', () => this.closeInstallModal());
-                    this.dom.pwaInstallAction.addEventListener('click', async () => {
-                        if (this.deferredPrompt) {
-                            this.deferredPrompt.prompt();
-                            const { outcome } = await this.deferredPrompt.userChoice;
-                            if (outcome === 'accepted') {
-                                this.deferredPrompt = null;
-                                this.closeInstallModal();
-                                this.dom.installBtn.classList.add('hidden');
                             }
-                        }
+                        }, 50);
                     });
+                };
 
-                    // Toggles
-                    const bindToggle = (el, key, callback) => {
-                        el.addEventListener('click', () => {
-                            this.state.settings[key] = !this.state.settings[key];
-                            this.updateToggleUI(el, this.state.settings[key]);
-                            this.saveSettings();
-                            if (callback) callback();
-                        });
-                    };
-                    
-                    this.dom.toggles.lang.addEventListener('click', () => {
-                        this.state.settings.language = this.state.settings.language === 'en' ? 'ja' : 'en';
-                        this.updateToggleUI(this.dom.toggles.lang, this.state.settings.language === 'ja');
-                        this.updateLanguage();
-                        this.saveSettings();
-                    });
-
-                    bindToggle(this.dom.toggles.theme, 'darkMode', () => this.updateTheme());
-                    bindToggle(this.dom.toggles.sound, 'sound');
-                    bindToggle(this.dom.toggles.autoStart, 'autoStart');
-                    bindToggle(this.dom.toggles.longBreak, 'enableLongBreak', () => {
-                        this.toggleIntervalVisibility();
-                        this.renderSessionDots();
-                    });
-
-                    document.addEventListener('visibilitychange', () => this.handleVisibilityChange());
-                }
-                
-                initFullscreen() {
-                    this.dom.fullscreenBtn.addEventListener('click', () => {
-                        if (!document.fullscreenElement) {
-                            document.documentElement.requestFullscreen().catch(err => {
-                                console.log(`Error attempting to enable fullscreen: ${err.message}`);
-                            });
-                        } else {
-                            if (document.exitFullscreen) {
-                                document.exitFullscreen();
-                            }
-                        }
-                    });
-
-                    document.addEventListener('fullscreenchange', () => {
-                        if (document.fullscreenElement) {
-                            this.dom.iconMaximize.classList.add('hidden');
-                            this.dom.iconMinimize.classList.remove('hidden');
-                        } else {
-                            this.dom.iconMaximize.classList.remove('hidden');
-                            this.dom.iconMinimize.classList.add('hidden');
-                        }
-                    });
-                }
-
-                initPWAInstall() {
-                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-                    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-                    if (!isStandalone) {
-                        this.dom.installBtn.classList.remove('hidden');
+                setupPicker('picker-focus', 'focus');
+                setupPicker('picker-short', 'short');
+                setupPicker('picker-long', 'long');
+            }
+            
+            scrollToCurrentPickers() {
+                ['focus', 'short', 'long'].forEach(key => {
+                    const container = document.getElementById(`picker-${key}`);
+                    const val = this.state.settings[key];
+                    const item = container.querySelector(`.drum-item[data-value="${val}"]`);
+                    if(item) {
+                        container.scrollTop = item.offsetTop - 40;
                     }
+                });
+            }
 
-                    window.addEventListener('beforeinstallprompt', (e) => {
-                        e.preventDefault();
-                        this.deferredPrompt = e;
-                        this.dom.installBtn.classList.remove('hidden');
-                    });
+            initModalGestures() {
+                this.setupHammer(this.dom.modalContent, () => this.closeSettings());
+                this.setupHammer(this.dom.installContent, () => this.closeInstallModal());
+                this.setupHammer(this.dom.infoContent, () => this.closeInfoModal());
+            }
 
-                    window.addEventListener('appinstalled', () => {
-                        this.deferredPrompt = null;
-                        this.dom.installBtn.classList.add('hidden');
-                    });
-
-                    if (isIOS) {
-                        this.dom.iosInstructions.classList.remove('hidden');
+            setupHammer(element, closeCallback) {
+                const mc = new Hammer(element);
+                mc.get('pan').set({ direction: Hammer.DIRECTION_VERTICAL });
+                mc.on("panstart", () => { element.style.transition = 'none'; });
+                mc.on("panmove", (e) => {
+                    if (e.deltaY > 0) element.style.transform = `translateY(${e.deltaY}px)`;
+                });
+                mc.on("panend", (e) => {
+                    element.style.transition = 'transform 0.3s ease-out';
+                    if (e.deltaY > 100 || e.velocityY > 0.5) {
+                        closeCallback();
+                        setTimeout(() => { element.style.transform = ''; }, 10);
                     } else {
-                        this.dom.pcInstructions.classList.remove('hidden');
+                        element.style.transform = 'translateY(0px)';
                     }
-                }
+                });
+            }
 
-                // Install Modal Logic (same style as Settings)
-                openInstallModal() {
-                    this.dom.installModal.classList.remove('hidden');
-                    this.dom.installBackdrop.classList.remove('opacity-0');
-                    void this.dom.installModal.offsetWidth;
-                    this.dom.installContent.classList.remove('translate-y-full');
-                    this.dom.installContent.classList.add('translate-y-0');
-                }
+            adjustInterval(delta) {
+                let newVal = this.state.settings.longBreakInterval + delta;
+                if (newVal < 1) newVal = 1;
+                if (newVal > 10) newVal = 10;
+                this.state.settings.longBreakInterval = newVal;
+                this.dom.intervalDisplay.textContent = newVal;
+                this.saveSettings();
+                this.renderSessionDots();
+            }
 
-                closeInstallModal() {
-                    this.dom.installContent.classList.remove('translate-y-0');
-                    this.dom.installContent.classList.add('translate-y-full');
-                    this.dom.installBackdrop.classList.add('opacity-0');
-                    setTimeout(() => {
-                        this.dom.installModal.classList.add('hidden');
-                    }, 300);
-                }
+            toggleIntervalVisibility() {
+                this.dom.intervalContainer.style.opacity = this.state.settings.enableLongBreak ? '1' : '0.4';
+                this.dom.intervalContainer.style.pointerEvents = this.state.settings.enableLongBreak ? 'auto' : 'none';
+            }
 
-                handleVisibilityChange() {
-                    if (document.hidden) return;
-                    if (this.state.isRunning && this.state.endTime) {
+            initEventListeners() {
+                this.dom.toggleBtn.addEventListener('click', () => this.toggleTimer());
+                this.dom.resetBtn.addEventListener('click', () => this.resetTimer());
+                this.dom.skipBtn.addEventListener('click', () => this.skipTimer());
+
+                this.dom.settingsBtn.addEventListener('click', () => this.openSettings());
+                this.dom.modalBackdrop.addEventListener('click', () => this.closeSettings());
+
+                this.dom.infoBtn.addEventListener('click', () => this.openInfoModal());
+                this.dom.infoBackdrop.addEventListener('click', () => this.closeInfoModal());
+                this.dom.closeInfo.addEventListener('click', () => this.closeInfoModal());
+
+                this.dom.installBtn.addEventListener('click', () => this.openInstallModal());
+                this.dom.closeInstall.addEventListener('click', () => this.closeInstallModal());
+                this.dom.installBackdrop.addEventListener('click', () => this.closeInstallModal());
+                this.dom.installLangToggle.addEventListener('click', () => {
+                    this.state.settings.language = this.state.settings.language === 'en' ? 'ja' : 'en';
+                    this.updateLanguage();
+                    this.updateToggleUI(this.dom.toggles.lang, this.state.settings.language === 'ja');
+                    this.saveSettings();
+                });
+                
+                this.dom.pwaInstallAction.addEventListener('click', async () => {
+                    if (this.deferredPrompt) {
+                        this.deferredPrompt.prompt();
+                        const { outcome } = await this.deferredPrompt.userChoice;
+                        if (outcome === 'accepted') {
+                            this.deferredPrompt = null;
+                            this.closeInstallModal();
+                            this.dom.installBtn.classList.add('hidden');
+                        }
+                    }
+                });
+
+                const bindToggle = (el, key, callback) => {
+                    el.addEventListener('click', () => {
+                        this.state.settings[key] = !this.state.settings[key];
+                        this.updateToggleUI(el, this.state.settings[key]);
+                        this.saveSettings();
+                        if (callback) callback();
+                    });
+                };
+                
+                this.dom.toggles.lang.addEventListener('click', () => {
+                    this.state.settings.language = this.state.settings.language === 'en' ? 'ja' : 'en';
+                    this.updateToggleUI(this.dom.toggles.lang, this.state.settings.language === 'ja');
+                    this.updateLanguage();
+                    this.saveSettings();
+                });
+
+                this.dom.toggles.notify.addEventListener('click', () => {
+                    this.requestNotificationPermission(true);
+                });
+
+                bindToggle(this.dom.toggles.theme, 'darkMode', () => this.updateTheme());
+                bindToggle(this.dom.toggles.sound, 'sound');
+                bindToggle(this.dom.toggles.autoStart, 'autoStart');
+                bindToggle(this.dom.toggles.longBreak, 'enableLongBreak', () => {
+                    this.toggleIntervalVisibility();
+                    this.renderSessionDots();
+                });
+
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden && this.state.isRunning) {
                         const now = Date.now();
                         const remaining = Math.ceil((this.state.endTime - now) / 1000);
                         if (remaining <= 0) {
@@ -816,267 +774,358 @@
                             this.updateDisplay();
                         }
                     }
-                }
-
-                updateToggleUI(btn, isActive) {
-                    const dot = btn.querySelector('span:not(.sr-only)');
-                    if (isActive) {
-                        btn.classList.remove('bg-gray-200');
-                        btn.classList.add('bg-black', 'dark:bg-white');
-                        dot.classList.add('translate-x-6', 'dark:translate-x-6');
-                        dot.classList.remove('translate-x-1');
-                        
-                        // Fix: Dark mode active state dot color
-                        dot.classList.add('dark:bg-black');
+                });
+            }
+            
+            initFullscreen() {
+                this.dom.fullscreenBtn.addEventListener('click', () => {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen().catch(err => console.log(err));
                     } else {
-                        btn.classList.add('bg-gray-200');
-                        btn.classList.remove('bg-black', 'dark:bg-white');
-                        dot.classList.remove('translate-x-6', 'dark:translate-x-6');
-                        dot.classList.add('translate-x-1');
-                        
-                        // Reset dot color
-                        dot.classList.remove('dark:bg-black');
+                        if (document.exitFullscreen) document.exitFullscreen();
                     }
-                }
-
-                updateTheme() {
-                    if (this.state.settings.darkMode) {
-                        document.documentElement.classList.add('dark');
-                        document.querySelector('meta[name="theme-color"]').setAttribute("content", "#000000");
+                });
+                document.addEventListener('fullscreenchange', () => {
+                    if (document.fullscreenElement) {
+                        this.dom.iconMaximize.classList.add('hidden');
+                        this.dom.iconMinimize.classList.remove('hidden');
                     } else {
-                        document.documentElement.classList.remove('dark');
-                        document.querySelector('meta[name="theme-color"]').setAttribute("content", "#F9FAFB");
+                        this.dom.iconMaximize.classList.remove('hidden');
+                        this.dom.iconMinimize.classList.add('hidden');
                     }
-                }
-                
-                updateLanguage() {
-                    const lang = this.state.settings.language;
-                    const texts = TRANSLATIONS[lang];
-                    document.querySelectorAll('[data-i18n]').forEach(el => {
-                        const key = el.getAttribute('data-i18n');
-                        if(texts[key]) el.textContent = texts[key];
-                    });
-                }
+                });
+            }
 
-                playChime() {
-                    if (!this.state.settings.sound) return;
-                    if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+            initPWAInstall() {
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
-                    const t = this.audioCtx.currentTime;
-                    const osc = this.audioCtx.createOscillator();
-                    const gain = this.audioCtx.createGain();
-
-                    osc.type = 'sine'; 
-                    osc.frequency.setValueAtTime(800, t); 
-                    osc.frequency.exponentialRampToValueAtTime(400, t + 0.15);
-                    
-                    gain.gain.setValueAtTime(0.08, t);
-                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
-
-                    osc.connect(gain);
-                    gain.connect(this.audioCtx.destination);
-                    osc.start();
-                    osc.stop(t + 0.15);
-                }
-
-                switchMode(mode) {
-                    this.pauseTimer();
-                    this.state.mode = mode;
-                    this.state.totalTime = this.state.settings[mode] * 60;
-                    this.state.timeLeft = this.state.totalTime;
-                    
-                    // Colors and Text Logic
-                    const isBreak = mode !== 'focus';
-                    if (isBreak) {
-                        this.dom.timerDisplay.classList.add('text-pomo-greenDark', 'dark:text-pomo-green');
-                        this.dom.timerDisplay.classList.remove('text-black', 'dark:text-white');
-                        this.dom.circle.classList.add('text-pomo-greenDark', 'dark:text-pomo-green');
-                        this.dom.circle.classList.remove('text-black', 'dark:text-white');
-                    } else {
-                        this.dom.timerDisplay.classList.remove('text-pomo-greenDark', 'dark:text-pomo-green');
-                        this.dom.timerDisplay.classList.add('text-black', 'dark:text-white');
-                        this.dom.circle.classList.remove('text-pomo-greenDark', 'dark:text-pomo-green');
-                        this.dom.circle.classList.add('text-black', 'dark:text-white');
-                    }
-
-                    Object.values(this.dom.statusIcons).forEach(el => el.classList.add('hidden'));
-                    if(mode === 'focus') this.dom.statusIcons.focus.classList.remove('hidden');
-                    else if(mode === 'long') this.dom.statusIcons.long.classList.remove('hidden');
-                    else this.dom.statusIcons.short.classList.remove('hidden');
-
-                    const labels = { focus: 'FOCUS', short: 'BREAK', long: 'RECHARGE' };
-                    this.dom.statusBadge.textContent = labels[mode];
-
-                    this.updateDisplay();
-                    const progress = this.state.timeLeft / this.state.totalTime;
-                    this.updateRing(progress);
-                }
-
-                toggleTimer() {
-                    this.state.isRunning ? this.pauseTimer() : this.startTimer();
-                }
-
-                startTimer() {
-                    if (this.state.isRunning) return;
-                    this.state.isRunning = true;
-                    this.state.endTime = Date.now() + (this.state.timeLeft * 1000);
-                    
-                    // UI Transitions
-                    this.dom.playIcon.classList.add('hidden');
-                    this.dom.pauseIcon.classList.remove('hidden');
-                    this.dom.toggleBtn.classList.add('btn-dimmed');
-                    this.dom.uiFades.forEach(el => el.classList.add('ui-hidden'));
-                    
-                    // Breathing Animation
-                    this.dom.timerDisplay.classList.add('animate-breathe');
-
-                    this.timerInterval = setInterval(() => {
-                        const remaining = Math.ceil((this.state.endTime - Date.now()) / 1000);
-                        if (remaining <= 0) {
-                            this.completeTimer();
-                        } else {
-                            this.state.timeLeft = remaining;
-                            this.updateDisplay();
-                        }
-                    }, 100);
-                }
-
-                pauseTimer() {
-                    this.state.isRunning = false;
-                    this.state.endTime = null;
-                    clearInterval(this.timerInterval);
-                    
-                    // UI Transitions
-                    this.dom.playIcon.classList.remove('hidden');
-                    this.dom.pauseIcon.classList.add('hidden');
-                    this.dom.toggleBtn.classList.remove('btn-dimmed');
-                    this.dom.uiFades.forEach(el => el.classList.remove('ui-hidden'));
-                    
-                    // Stop Animation
-                    this.dom.timerDisplay.classList.remove('animate-breathe');
-                }
-
-                resetTimer() {
-                    this.pauseTimer();
-                    this.state.timeLeft = this.state.settings[this.state.mode] * 60;
-                    this.state.totalTime = this.state.timeLeft;
-                    this.updateDisplay();
-                    const p = this.state.timeLeft / this.state.totalTime;
-                    this.updateRing(p);
-                    this.triggerActionAnimation();
-                }
-
-                skipTimer() {
-                    this.completeTimer(true);
-                    this.triggerActionAnimation();
-                }
-                
-                triggerActionAnimation() {
-                    // Pop animation
-                    const container = this.dom.ringContainer;
-                    container.classList.remove('animate-pop');
-                    void container.offsetWidth; // force reflow
-                    container.classList.add('animate-pop');
-                }
-
-                completeTimer(skipped = false) {
-                    this.pauseTimer();
-                    this.state.timeLeft = 0;
-                    this.updateDisplay();
-                    this.updateRing(0); // Empty
-
-                    if (!skipped) {
-                        this.playChime();
-                        this.sendNotification();
-                    }
-
-                    if (this.state.mode === 'focus') {
-                        if(!skipped) {
-                            this.state.sessionsCompleted++;
-                            this.renderSessionDots();
-                        }
-                        if (this.state.settings.enableLongBreak && 
-                            this.state.sessionsCompleted > 0 && 
-                            this.state.sessionsCompleted % this.state.settings.longBreakInterval === 0) {
-                            this.switchMode('long');
-                        } else {
-                            this.switchMode('short');
-                        }
-                    } else {
-                        this.switchMode('focus');
-                    }
-
-                    if (this.state.settings.autoStart && !skipped) {
-                        setTimeout(() => this.startTimer(), 1500);
+                if (!isStandalone) {
+                    this.dom.installBtn.classList.remove('hidden');
+                    if(isMobile) {
+                        setTimeout(() => this.openInstallModal(), 1000);
                     }
                 }
 
-                updateDisplay() {
-                    const m = Math.floor(this.state.timeLeft / 60);
-                    const s = this.state.timeLeft % 60;
-                    const timeStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                    this.dom.timerDisplay.textContent = timeStr;
-                    document.title = `${timeStr} - ${this.state.mode.toUpperCase()}`;
-                    const progress = this.state.timeLeft / this.state.totalTime;
-                    this.updateRing(progress);
-                }
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    this.deferredPrompt = e;
+                    this.dom.installBtn.classList.remove('hidden');
+                });
 
-                updateRing(percent) {
-                    const offset = this.circumference - (percent * this.circumference);
-                    this.dom.circle.style.strokeDashoffset = offset;
-                }
+                window.addEventListener('appinstalled', () => {
+                    this.deferredPrompt = null;
+                    this.dom.installBtn.classList.add('hidden');
+                });
 
-                renderSessionDots() {
-                    if(!this.state.settings.enableLongBreak) {
-                        this.dom.sessionIndicators.innerHTML = '';
-                        return;
-                    }
-                    const total = this.state.settings.longBreakInterval;
-                    const current = this.state.sessionsCompleted % total;
-                    
-                    let html = '';
-                    for(let i=0; i<total; i++) {
-                        const isFilled = i < current || (current === 0 && this.state.sessionsCompleted > 0 && this.state.mode !== 'focus'); 
-                        
-                        const fillClass = isFilled ? 'bg-black dark:bg-white' : 'bg-black/10 dark:bg-white/10';
-                        html += `<div class="w-2 h-2 rounded-full mx-1 transition-all duration-300 ${fillClass}"></div>`;
-                    }
-                    this.dom.sessionIndicators.innerHTML = html;
-                }
-
-                // Settings Modal
-                openSettings() {
-                    this.dom.settingsModal.classList.remove('hidden');
-                    this.dom.modalBackdrop.classList.remove('opacity-0');
-                    void this.dom.settingsModal.offsetWidth;
-                    this.dom.modalContent.classList.remove('translate-y-full');
-                    this.dom.modalContent.classList.add('translate-y-0');
-                    setTimeout(() => {
-                        this.scrollToCurrentPickers();
-                    }, 300);
-                }
-                closeSettings() {
-                    this.dom.modalContent.classList.remove('translate-y-0');
-                    this.dom.modalContent.classList.add('translate-y-full');
-                    this.dom.modalBackdrop.classList.add('opacity-0');
-                    setTimeout(() => {
-                        this.dom.settingsModal.classList.add('hidden');
-                    }, 300);
-                }
-
-                requestNotificationPermission() {
-                    if ("Notification" in window && Notification.permission !== "granted") {
-                        Notification.requestPermission();
-                    }
-                }
-                sendNotification() {
-                    if (Notification.permission === "granted") {
-                        new Notification("Focus Flow", { body: "Session Complete", icon: "favicon.svg" });
-                    }
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (isIOS) {
+                    this.dom.iosInstructions.classList.remove('hidden');
+                } else {
+                    this.dom.pcInstructions.classList.remove('hidden');
                 }
             }
-            window.app = new PomodoroApp(); 
-        </script>
-    </body>
-    </html>
+
+            openInstallModal() {
+                this.dom.installModal.classList.remove('hidden');
+                this.dom.installBackdrop.classList.remove('opacity-0');
+                void this.dom.installModal.offsetWidth;
+                this.dom.installContent.classList.remove('translate-y-full');
+                this.dom.installContent.classList.add('translate-y-0');
+            }
+
+            closeInstallModal() {
+                this.dom.installContent.classList.remove('translate-y-0');
+                this.dom.installContent.classList.add('translate-y-full');
+                this.dom.installBackdrop.classList.add('opacity-0');
+                setTimeout(() => {
+                    this.dom.installModal.classList.add('hidden');
+                }, 300);
+            }
+
+            updateToggleUI(btn, isActive) {
+                const dot = btn.querySelector('span:not(.sr-only)');
+                if (isActive) {
+                    btn.classList.remove('bg-gray-200');
+                    btn.classList.add('bg-black', 'dark:bg-white');
+                    dot.classList.add('translate-x-6', 'dark:translate-x-6');
+                    dot.classList.remove('translate-x-1');
+                    dot.classList.add('dark:bg-black');
+                } else {
+                    btn.classList.add('bg-gray-200');
+                    btn.classList.remove('bg-black', 'dark:bg-white');
+                    dot.classList.remove('translate-x-6', 'dark:translate-x-6');
+                    dot.classList.add('translate-x-1');
+                    dot.classList.remove('dark:bg-black');
+                }
+            }
+
+            updateTheme() {
+                if (this.state.settings.darkMode) {
+                    document.documentElement.classList.add('dark');
+                    document.querySelector('meta[name="theme-color"]').setAttribute("content", "#000000");
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    document.querySelector('meta[name="theme-color"]').setAttribute("content", "#F9FAFB");
+                }
+            }
+            
+            updateLanguage() {
+                const lang = this.state.settings.language;
+                const texts = TRANSLATIONS[lang];
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    if(texts[key]) el.textContent = texts[key];
+                });
+            }
+
+            playChime() {
+                if (!this.state.settings.sound) return;
+                if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+
+                const t = this.audioCtx.currentTime;
+                const osc = this.audioCtx.createOscillator();
+                const gain = this.audioCtx.createGain();
+
+                osc.type = 'sine'; 
+                osc.frequency.setValueAtTime(800, t); 
+                osc.frequency.exponentialRampToValueAtTime(400, t + 0.15);
+                
+                gain.gain.setValueAtTime(0.08, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+
+                osc.connect(gain);
+                gain.connect(this.audioCtx.destination);
+                osc.start();
+                osc.stop(t + 0.15);
+            }
+
+            switchMode(mode, autoStart = false) {
+                if (!autoStart) this.pauseTimer();
+                this.state.mode = mode;
+                this.state.totalTime = this.state.settings[mode] * 60;
+                this.state.timeLeft = this.state.totalTime;
+                
+                const isBreak = mode !== 'focus';
+                if (isBreak) {
+                    this.dom.timerDisplay.classList.add('text-pomo-greenDark', 'dark:text-pomo-green');
+                    this.dom.timerDisplay.classList.remove('text-black', 'dark:text-white');
+                    this.dom.circle.classList.add('text-pomo-greenDark', 'dark:text-pomo-green');
+                    this.dom.circle.classList.remove('text-black', 'dark:text-white');
+                } else {
+                    this.dom.timerDisplay.classList.remove('text-pomo-greenDark', 'dark:text-pomo-green');
+                    this.dom.timerDisplay.classList.add('text-black', 'dark:text-white');
+                    this.dom.circle.classList.remove('text-pomo-greenDark', 'dark:text-pomo-green');
+                    this.dom.circle.classList.add('text-black', 'dark:text-white');
+                }
+
+                const labels = { focus: 'FOCUS', short: 'BREAK', long: 'RECHARGE' };
+                this.dom.statusBadge.textContent = labels[mode];
+
+                this.updateDisplay();
+                
+                if (!autoStart) {
+                    this.updateRing(1);
+                }
+            }
+
+            toggleTimer() {
+                this.state.isRunning ? this.pauseTimer() : this.startTimer();
+            }
+
+            startTimer() {
+                if (this.state.isRunning) return;
+                this.state.isRunning = true;
+                this.state.endTime = Date.now() + (this.state.timeLeft * 1000);
+                
+                this.dom.playIcon.classList.add('hidden');
+                this.dom.pauseIcon.classList.remove('hidden');
+                this.dom.toggleBtn.classList.add('btn-dimmed');
+                
+                this.dom.uiFades.forEach(el => {
+                    el.classList.remove('fade-enter');
+                    el.classList.add('fade-exit');
+                });
+                
+                this.dom.timerDisplay.classList.add('animate-breathe');
+                
+                this.worker.postMessage({ command: 'start' });
+            }
+
+            pauseTimer() {
+                this.state.isRunning = false;
+                this.state.endTime = null;
+                
+                this.dom.playIcon.classList.remove('hidden');
+                this.dom.pauseIcon.classList.add('hidden');
+                this.dom.toggleBtn.classList.remove('btn-dimmed');
+                
+                this.dom.uiFades.forEach(el => {
+                    el.classList.remove('fade-exit');
+                    el.classList.add('fade-enter');
+                });
+                
+                this.dom.timerDisplay.classList.remove('animate-breathe');
+                
+                this.worker.postMessage({ command: 'stop' });
+            }
+
+            resetTimer() {
+                this.pauseTimer();
+                this.state.timeLeft = this.state.settings[this.state.mode] * 60;
+                this.state.totalTime = this.state.timeLeft;
+                this.updateDisplay();
+                this.updateRing(1); 
+                this.triggerActionAnimation();
+            }
+
+            skipTimer() {
+                this.completeTimer(true);
+                this.triggerActionAnimation();
+            }
+            
+            triggerActionAnimation() {
+                const container = this.dom.ringContainer;
+                container.classList.remove('animate-pop');
+                void container.offsetWidth; 
+                container.classList.add('animate-pop');
+            }
+
+            completeTimer(skipped = false) {
+                // 1. Notify for the COMPLETED session
+                if (!skipped) {
+                    this.playChime();
+                    this.sendNotification(); // Send notification for the session that just ended
+                }
+
+                // 2. Determine Next Mode
+                let nextMode = 'focus';
+                if (this.state.mode === 'focus') {
+                    if(!skipped) {
+                        this.state.sessionsCompleted++;
+                        this.renderSessionDots();
+                    }
+                    if (this.state.settings.enableLongBreak && 
+                        this.state.sessionsCompleted > 0 && 
+                        this.state.sessionsCompleted % this.state.settings.longBreakInterval === 0) {
+                        nextMode = 'long';
+                    } else {
+                        nextMode = 'short';
+                    }
+                } else {
+                    nextMode = 'focus';
+                }
+
+                // 3. Handle Transition
+                const autoStart = this.state.settings.autoStart && !skipped;
+
+                if (autoStart) {
+                    // Seamless Transition
+                    this.switchMode(nextMode, true); // true = don't stop
+                    this.state.endTime = Date.now() + (this.state.timeLeft * 1000);
+                    this.triggerActionAnimation();
+                    // Worker continues running
+                } else {
+                    // Manual Stop
+                    this.pauseTimer();
+                    this.switchMode(nextMode, false);
+                    // UI reset is handled in switchMode(false)
+                }
+            }
+
+            updateDisplay() {
+                const m = Math.floor(this.state.timeLeft / 60);
+                const s = this.state.timeLeft % 60;
+                const timeStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                this.dom.timerDisplay.textContent = timeStr;
+                document.title = `${timeStr} - ${this.state.mode.toUpperCase()}`;
+                
+                const progress = this.state.timeLeft / this.state.totalTime;
+                this.updateRing(progress);
+            }
+
+            updateRing(percent) {
+                const offset = this.circumference - (percent * this.circumference);
+                this.dom.circle.style.strokeDashoffset = offset;
+            }
+
+            renderSessionDots() {
+                if(!this.state.settings.enableLongBreak) {
+                    this.dom.sessionIndicators.innerHTML = '';
+                    return;
+                }
+                const total = this.state.settings.longBreakInterval;
+                const current = this.state.sessionsCompleted % total;
+                
+                let html = '';
+                for(let i=0; i<total; i++) {
+                    const isFilled = i < current || (current === 0 && this.state.sessionsCompleted > 0 && this.state.mode !== 'focus'); 
+                    
+                    const fillClass = isFilled ? 'bg-black dark:bg-white' : 'bg-black/10 dark:bg-white/10';
+                    html += `<div class="w-2 h-2 rounded-full mx-1 transition-all duration-300 ${fillClass}"></div>`;
+                }
+                this.dom.sessionIndicators.innerHTML = html;
+            }
+
+            // Modal Handlers
+            openSettings() { this.openSheet(this.dom.settingsModal, this.dom.modalContent, this.dom.modalBackdrop, true); }
+            closeSettings() { this.closeSheet(this.dom.settingsModal, this.dom.modalContent, this.dom.modalBackdrop); }
+            
+            openInfoModal() { this.openSheet(this.dom.infoModal, this.dom.infoContent, this.dom.infoBackdrop, false); }
+            closeInfoModal() { this.closeSheet(this.dom.infoModal, this.dom.infoContent, this.dom.infoBackdrop); }
+
+            openSheet(modal, content, backdrop, scroll) {
+                modal.classList.remove('hidden');
+                backdrop.classList.remove('opacity-0');
+                void modal.offsetWidth;
+                content.classList.remove('translate-y-full');
+                content.classList.add('translate-y-0');
+                if(scroll) setTimeout(() => this.scrollToCurrentPickers(), 300);
+            }
+
+            closeSheet(modal, content, backdrop) {
+                content.classList.remove('translate-y-0');
+                content.classList.add('translate-y-full');
+                backdrop.classList.add('opacity-0');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+
+            requestNotificationPermission(fromSettings = false) {
+                if (!("Notification" in window)) return;
+                
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        this.state.settings.notifications = true;
+                        this.updateToggleUI(this.dom.toggles.notify, true);
+                        if(fromSettings) new Notification("Focus Flow", { body: "Notifications enabled." });
+                    } else {
+                        this.state.settings.notifications = false;
+                        this.updateToggleUI(this.dom.toggles.notify, false);
+                    }
+                });
+            }
+
+            sendNotification() {
+                if (this.state.settings.notifications && Notification.permission === "granted") {
+                    const now = new Date();
+                    const timeStr = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+                    
+                    // Logic: Notification is sent at the END of a session.
+                    // If mode was 'focus', we just finished focusing -> Break time.
+                    // If mode was 'short'/'long', we just finished break -> Focus time.
+                    const texts = TRANSLATIONS[this.state.settings.language];
+                    const msg = this.state.mode === 'focus' ? texts.breakTime : texts.focusTime;
+                    
+                    new Notification("Focus Flow", { 
+                        body: `${msg} (${timeStr})`, 
+                        icon: "favicon.svg",
+                        tag: `focus-timer-${Date.now()}` // Unique tag to ensure notification always appears
+                    });
+                }
+            }
+        }
+        window.app = new PomodoroApp(); 
+    </script>
+</body>
+</html>
