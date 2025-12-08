@@ -207,7 +207,7 @@
             overflow: hidden;
             font-family: "Ndot 55", sans-serif;
             line-height: 1;
-            gap: 0; /* Remove gap completely */
+            gap: 0.2rem; /* Restore small gap */
         }
         .drum-column {
             display: flex;
@@ -220,7 +220,7 @@
             align-items: center;
             justify-content: center;
             font-size: 3.5rem; 
-            width: 1.8rem; /* Tighten width */
+            width: 2.1rem; /* Widened from 1.8rem */
             flex-shrink: 0; 
         }
         .drum-separator {
@@ -230,12 +230,12 @@
             justify-content: center;
             font-size: 3.5rem;
             padding-bottom: 0.5rem;
-            width: 1rem; /* Tighten width */
+            width: 1.2rem; /* Widened from 1rem */
         }
         @media (min-width: 640px) {
-            .drum-display-container { height: 6rem; gap: 0; }
-            .drum-digit { height: 6rem; font-size: 4.5rem; width: 2.6rem; }
-            .drum-separator { height: 6rem; font-size: 4.5rem; width: 1.5rem; }
+            .drum-display-container { height: 6rem; gap: 0.2rem; }
+            .drum-digit { height: 6rem; font-size: 4.5rem; width: 2.8rem; }
+            .drum-separator { height: 6rem; font-size: 4.5rem; width: 1.6rem; }
         }
     </style>
 </head>
@@ -264,8 +264,8 @@
             </div>
         </div>
 
-        <!-- Timer Ring (Responsive Size) -->
-        <div class="relative w-[75vw] h-[75vw] max-w-80 max-h-80 flex items-center justify-center">
+        <!-- Timer Ring (Responsive Size - Enlarged) -->
+        <div class="relative w-[85vw] h-[85vw] max-w-[24rem] max-h-[24rem] flex items-center justify-center">
             <!-- Animate wrapper for pop effect -->
             <div id="ring-container" class="relative w-full h-full flex items-center justify-center">
                 <svg class="progress-ring w-full h-full" viewBox="0 0 120 120">
