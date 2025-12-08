@@ -131,7 +131,7 @@
         /* Toggle Switch */
         .toggle-checkbox:checked { right: 0; border-color: #fff; }
         
-        /* Drum Picker Styles */
+        /* Drum Picker Styles (Settings) */
         .drum-picker {
             height: 120px;
             overflow-y: scroll;
@@ -196,6 +196,47 @@
         .btn-dimmed:hover {
             opacity: 0.3 !important;
         }
+
+        /* Main Drum Timer Display */
+        .drum-display-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 4.5rem;
+            width: auto; /* Allow centering */
+            overflow: hidden;
+            font-family: "Ndot 55", sans-serif;
+            line-height: 1;
+            gap: 0; /* Remove gap completely */
+        }
+        .drum-column {
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .drum-digit {
+            height: 4.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem; 
+            width: 1.8rem; /* Tighten width */
+            flex-shrink: 0; 
+        }
+        .drum-separator {
+            height: 4.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            padding-bottom: 0.5rem;
+            width: 1rem; /* Tighten width */
+        }
+        @media (min-width: 640px) {
+            .drum-display-container { height: 6rem; gap: 0; }
+            .drum-digit { height: 6rem; font-size: 4.5rem; width: 2.6rem; }
+            .drum-separator { height: 6rem; font-size: 4.5rem; width: 1.5rem; }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100 transition-colors duration-500 overflow-hidden h-[100dvh] w-full flex flex-col items-center justify-between font-sans bg-matrix">
@@ -234,10 +275,20 @@
                     <circle id="progress-ring" class="progress-ring__circle text-black dark:text-white" stroke-width="2.5" stroke-linecap="round" stroke="currentColor" fill="transparent" r="54" cx="60" cy="60" style="stroke-dasharray: 339.292; stroke-dashoffset: 0;"/>
                 </svg>
 
-                <!-- Time Display -->
-                <div class="absolute inset-0 flex flex-col items-center justify-center z-10">
-                    <!-- Ndot 55 Font for Timer -->
-                    <div id="timer-display" class="timer-text font-ndot text-6xl sm:text-7xl tracking-wide tabular-nums text-black dark:text-white select-none origin-center">25:00</div>
+                <!-- Drum Display -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center z-10 w-full px-4">
+                    <div class="drum-display-container text-black dark:text-white" id="drum-container">
+                        <!-- Minutes 10s -->
+                        <div class="h-full overflow-hidden w-auto flex justify-center"><div class="drum-column" id="drum-m1"></div></div>
+                        <!-- Minutes 1s -->
+                        <div class="h-full overflow-hidden w-auto flex justify-center"><div class="drum-column" id="drum-m2"></div></div>
+                        <!-- Separator -->
+                        <div class="drum-separator">:</div>
+                        <!-- Seconds 10s -->
+                        <div class="h-full overflow-hidden w-auto flex justify-center"><div class="drum-column" id="drum-s1"></div></div>
+                        <!-- Seconds 1s -->
+                        <div class="h-full overflow-hidden w-auto flex justify-center"><div class="drum-column" id="drum-s2"></div></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -271,18 +322,17 @@
         </div>
         <p class="font-ndot text-xs opacity-40 uppercase tracking-widest">Session</p>
         
-        <!-- Bottom Controls Container -->
+        <!-- Bottom Controls -->
         <div class="fade-enter absolute bottom-6 left-0 right-0 px-6 flex justify-between items-center pointer-events-none">
             
-            <!-- Install Button (Left) -->
+            <!-- Install Button -->
             <button id="install-btn" class="pointer-events-auto hidden p-3 rounded-full bg-white/10 dark:bg-white/5 backdrop-blur-md border border-black/10 dark:border-white/10 hover:scale-110 transition-all text-black dark:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </button>
 
-            <!-- Spacer -->
             <div class="flex-1"></div>
 
-            <!-- Fullscreen Button (Right) -->
+            <!-- Fullscreen Button -->
             <button id="fullscreen-btn" class="pointer-events-auto p-3 rounded-full bg-white/10 dark:bg-white/5 backdrop-blur-md border border-black/10 dark:border-white/10 hover:scale-110 transition-all text-black dark:text-white opacity-60 hover:opacity-100">
                 <svg id="icon-maximize" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
                 <svg id="icon-minimize" class="hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>
@@ -290,13 +340,11 @@
         </div>
     </footer>
     
-    <!-- Info Modal (Sheet) -->
+    <!-- Info Modal -->
     <div id="info-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="info-backdrop"></div>
         <div id="info-content" class="absolute bottom-0 left-0 right-0 glass-panel rounded-t-[2.5rem] pt-3 pb-8 px-8 transform translate-y-full transition-transform duration-300 ease-out sm:max-w-md sm:mx-auto shadow-2xl overflow-hidden touch-none">
-            <div class="w-full flex justify-center pb-6 pt-2">
-                <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
-            </div>
+            <div class="w-full flex justify-center pb-6 pt-2"><div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div></div>
             <h3 class="text-xl font-bold font-sans mb-6 text-center">Focus Flow</h3>
             <div class="space-y-4">
                 <a href="https://github.com/lineside0418/Focus/" target="_blank" class="flex items-center p-4 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
@@ -317,13 +365,11 @@
         </div>
     </div>
 
-    <!-- Install Help Modal (Sheet Style) -->
+    <!-- Install Help Modal -->
     <div id="install-modal" class="fixed inset-0 z-[60] hidden" role="dialog" aria-modal="true">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="install-backdrop"></div>
         <div id="install-content" class="absolute bottom-0 left-0 right-0 glass-panel rounded-t-[2.5rem] pt-3 pb-8 px-8 transform translate-y-full transition-transform duration-300 ease-out sm:max-w-md sm:mx-auto shadow-2xl overflow-hidden touch-none">
-            <div class="w-full flex justify-center pb-6 pt-2">
-                <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
-            </div>
+            <div class="w-full flex justify-center pb-6 pt-2"><div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div></div>
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-sans font-bold text-center flex-1" data-i18n="installApp">Install App</h3>
                 <button id="install-lang-toggle" class="text-xs font-bold px-2 py-1 rounded border border-gray-300 dark:border-gray-700">JA/EN</button>
@@ -343,9 +389,7 @@
             </div>
             <div id="pc-instructions" class="hidden text-center">
                 <p class="text-sm opacity-80 mb-6 font-sans" data-i18n="installPC">Install this timer for the best experience.</p>
-                <button id="pwa-install-action" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl font-sans hover:opacity-90 transition-opacity" data-i18n="installNow">
-                    INSTALL NOW
-                </button>
+                <button id="pwa-install-action" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl font-sans hover:opacity-90 transition-opacity" data-i18n="installNow">INSTALL NOW</button>
             </div>
             <button id="close-install" class="mt-6 w-full py-3 text-sm opacity-50 hover:opacity-100 font-medium font-sans" data-i18n="dismiss">Dismiss</button>
         </div>
@@ -355,9 +399,7 @@
     <div id="settings-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="modal-backdrop"></div>
         <div id="modal-content" class="absolute bottom-0 left-0 right-0 glass-panel rounded-t-[2.5rem] pt-3 pb-8 px-8 transform translate-y-full transition-transform duration-300 ease-out sm:max-w-md sm:mx-auto shadow-2xl overflow-hidden touch-none" style="max-height: 85vh;">
-            <div class="w-full flex justify-center pb-6 pt-2" id="drag-handle-area">
-                <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
-            </div>
+            <div class="w-full flex justify-center pb-6 pt-2" id="drag-handle-area"><div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div></div>
             <div class="flex justify-center items-center mb-6 border-b border-black/5 dark:border-white/10 pb-4">
                 <h2 class="text-lg font-bold font-sans tracking-wide" data-i18n="settings">SETTINGS</h2>
             </div>
@@ -418,8 +460,6 @@
                 installNow: "INSTALL NOW",
                 dismiss: "Dismiss",
                 starText: "If you like this app, please give it a star on GitHub! ⭐",
-                focusTime: "Time to focus!",
-                breakTime: "Time for a break!"
             },
             ja: {
                 settings: "SETTINGS",
@@ -440,8 +480,6 @@
                 installNow: "インストール",
                 dismiss: "閉じる",
                 starText: "もし気に入ったら、GitHubでスターを付けてね！ ⭐",
-                focusTime: "集中の時間だよ！",
-                breakTime: "休憩の時間だよ！"
             }
         };
 
@@ -466,6 +504,8 @@
             constructor() {
                 this.deferredPrompt = null;
                 this.worker = new Worker(workerUrl);
+                this.audioCtx = null;
+                this.silentAudio = null;
                 this.state = {
                     mode: 'focus', 
                     timeLeft: 25 * 60,
@@ -483,7 +523,6 @@
                 };
 
                 this.dom = {
-                    timerDisplay: document.getElementById('timer-display'),
                     ringContainer: document.getElementById('ring-container'),
                     circle: document.getElementById('progress-ring'),
                     toggleBtn: document.getElementById('toggle-btn'),
@@ -495,8 +534,15 @@
                     statusContainer: document.getElementById('status-container'),
                     appHeader: document.getElementById('app-header'),
                     appFooter: document.getElementById('app-footer'),
-                    // Selector excludes status-container so it stays visible
-                    uiFades: document.querySelectorAll('.fade-enter:not(#status-container)'),
+                    uiFades: document.querySelectorAll('.fade-enter'),
+                    
+                    drumCols: {
+                        m1: document.getElementById('drum-m1'),
+                        m2: document.getElementById('drum-m2'),
+                        s1: document.getElementById('drum-s1'),
+                        s2: document.getElementById('drum-s2')
+                    },
+                    drumContainer: document.getElementById('drum-container'),
                     
                     settingsModal: document.getElementById('settings-modal'),
                     modalContent: document.getElementById('modal-content'),
@@ -540,6 +586,7 @@
                 this.circumference = this.radius * 2 * Math.PI;
                 this.dom.circle.style.strokeDasharray = `${this.circumference} ${this.circumference}`;
 
+                this.initDrums();
                 this.loadSettings();
                 this.initEventListeners();
                 this.initDrumPickers(); 
@@ -557,6 +604,21 @@
                     this.state.settings.notifications = true;
                     this.updateToggleUI(this.dom.toggles.notify, true);
                 }
+            }
+
+            initDrums() {
+                const createDigits = (container, max) => {
+                    for(let i=0; i<=max; i++) {
+                        const div = document.createElement('div');
+                        div.className = 'drum-digit';
+                        div.textContent = i;
+                        container.appendChild(div);
+                    }
+                };
+                createDigits(this.dom.drumCols.m1, 9); // Min 10s (0-9 to allow up to 99)
+                createDigits(this.dom.drumCols.m2, 9); // Min 1s
+                createDigits(this.dom.drumCols.s1, 5); // Sec 10s (0-5)
+                createDigits(this.dom.drumCols.s2, 9); // Sec 1s
             }
 
             initWorker() {
@@ -882,9 +944,8 @@
 
             playChime() {
                 if (!this.state.settings.sound) return;
-                if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
-
+                this.ensureAudioCtx();
+                
                 const t = this.audioCtx.currentTime;
                 const osc = this.audioCtx.createOscillator();
                 const gain = this.audioCtx.createGain();
@@ -902,23 +963,60 @@
                 osc.stop(t + 0.15);
             }
 
+            ensureAudioCtx() {
+                if (!this.audioCtx) {
+                    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.audioCtx.state === 'suspended') {
+                    this.audioCtx.resume();
+                }
+            }
+
+            // Silent Audio Hack for Android Background keep-alive
+            startSilentAudio() {
+                this.ensureAudioCtx();
+                // If already playing, don't restart
+                if (this.silentAudio) return;
+
+                // Create a 1-second buffer of silence
+                const buffer = this.audioCtx.createBuffer(1, this.audioCtx.sampleRate, this.audioCtx.sampleRate);
+                // Data is already zeros (silence)
+
+                this.silentAudio = this.audioCtx.createBufferSource();
+                this.silentAudio.buffer = buffer;
+                this.silentAudio.loop = true;
+                this.silentAudio.connect(this.audioCtx.destination);
+                this.silentAudio.start();
+            }
+
+            stopSilentAudio() {
+                if (this.silentAudio) {
+                    this.silentAudio.stop();
+                    this.silentAudio = null;
+                }
+            }
+
             switchMode(mode, autoStart = false) {
                 if (!autoStart) this.pauseTimer();
                 this.state.mode = mode;
                 this.state.totalTime = this.state.settings[mode] * 60;
                 this.state.timeLeft = this.state.totalTime;
                 
+                // Colors and Text Logic
                 const isBreak = mode !== 'focus';
+                const drumContainer = this.dom.drumContainer;
+                const ring = this.dom.circle;
+
                 if (isBreak) {
-                    this.dom.timerDisplay.classList.add('text-pomo-greenDark', 'dark:text-pomo-green');
-                    this.dom.timerDisplay.classList.remove('text-black', 'dark:text-white');
-                    this.dom.circle.classList.add('text-pomo-greenDark', 'dark:text-pomo-green');
-                    this.dom.circle.classList.remove('text-black', 'dark:text-white');
+                    drumContainer.classList.add('text-pomo-greenDark', 'dark:text-pomo-green');
+                    drumContainer.classList.remove('text-black', 'dark:text-white');
+                    ring.classList.add('text-pomo-greenDark', 'dark:text-pomo-green');
+                    ring.classList.remove('text-black', 'dark:text-white');
                 } else {
-                    this.dom.timerDisplay.classList.remove('text-pomo-greenDark', 'dark:text-pomo-green');
-                    this.dom.timerDisplay.classList.add('text-black', 'dark:text-white');
-                    this.dom.circle.classList.remove('text-pomo-greenDark', 'dark:text-pomo-green');
-                    this.dom.circle.classList.add('text-black', 'dark:text-white');
+                    drumContainer.classList.remove('text-pomo-greenDark', 'dark:text-pomo-green');
+                    drumContainer.classList.add('text-black', 'dark:text-white');
+                    ring.classList.remove('text-pomo-greenDark', 'dark:text-pomo-green');
+                    ring.classList.add('text-black', 'dark:text-white');
                 }
 
                 const labels = { focus: 'FOCUS', short: 'S-BREAK', long: 'L-BREAK' };
@@ -940,6 +1038,9 @@
                 this.state.isRunning = true;
                 this.state.endTime = Date.now() + (this.state.timeLeft * 1000);
                 
+                // Start silent audio hack
+                this.startSilentAudio();
+
                 this.dom.playIcon.classList.add('hidden');
                 this.dom.pauseIcon.classList.remove('hidden');
                 this.dom.toggleBtn.classList.add('btn-dimmed');
@@ -949,8 +1050,6 @@
                     el.classList.add('fade-exit');
                 });
                 
-                this.dom.timerDisplay.classList.add('animate-breathe');
-                
                 this.worker.postMessage({ command: 'start' });
             }
 
@@ -958,6 +1057,9 @@
                 this.state.isRunning = false;
                 this.state.endTime = null;
                 
+                // Stop silent audio
+                this.stopSilentAudio();
+
                 this.dom.playIcon.classList.remove('hidden');
                 this.dom.pauseIcon.classList.add('hidden');
                 this.dom.toggleBtn.classList.remove('btn-dimmed');
@@ -966,8 +1068,6 @@
                     el.classList.remove('fade-exit');
                     el.classList.add('fade-enter');
                 });
-                
-                this.dom.timerDisplay.classList.remove('animate-breathe');
                 
                 this.worker.postMessage({ command: 'stop' });
             }
@@ -997,7 +1097,6 @@
             completeTimer(skipped = false) {
                 if (!skipped) {
                     this.playChime();
-                    this.sendNotification();
                 }
 
                 let nextMode = 'focus';
@@ -1033,11 +1132,30 @@
                 const m = Math.floor(this.state.timeLeft / 60);
                 const s = this.state.timeLeft % 60;
                 const timeStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                this.dom.timerDisplay.textContent = timeStr;
                 
                 const modeLabel = this.state.mode === 'focus' ? 'FOCUS' : (this.state.mode === 'short' ? 'S-BREAK' : 'L-BREAK');
                 document.title = `${timeStr} - ${modeLabel}`;
                 
+                // Drum Update Logic
+                const m1 = Math.floor(m / 10);
+                const m2 = m % 10;
+                const s1 = Math.floor(s / 10);
+                const s2 = s % 10;
+
+                // Use container height for translation calculation
+                const drumContainer = this.dom.drumContainer;
+                const drumHeight = drumContainer.clientHeight;
+
+                const setDrum = (el, val) => {
+                    // Translate by (value * containerHeight) pixels
+                    el.style.transform = `translateY(-${val * drumHeight}px)`;
+                };
+
+                setDrum(this.dom.drumCols.m1, m1);
+                setDrum(this.dom.drumCols.m2, m2);
+                setDrum(this.dom.drumCols.s1, s1);
+                setDrum(this.dom.drumCols.s2, s2);
+
                 const progress = this.state.timeLeft / this.state.totalTime;
                 this.updateRing(progress);
             }
@@ -1086,37 +1204,6 @@
                 content.classList.add('translate-y-full');
                 backdrop.classList.add('opacity-0');
                 setTimeout(() => modal.classList.add('hidden'), 300);
-            }
-
-            requestNotificationPermission(fromSettings = false) {
-                if (!("Notification" in window)) return;
-                
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        this.state.settings.notifications = true;
-                        this.updateToggleUI(this.dom.toggles.notify, true);
-                        if(fromSettings) new Notification("Focus Flow", { body: "Notifications enabled." });
-                    } else {
-                        this.state.settings.notifications = false;
-                        this.updateToggleUI(this.dom.toggles.notify, false);
-                    }
-                });
-            }
-
-            sendNotification() {
-                if (this.state.settings.notifications && Notification.permission === "granted") {
-                    const now = new Date();
-                    const timeStr = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
-                    
-                    const texts = TRANSLATIONS[this.state.settings.language];
-                    const msg = this.state.mode === 'focus' ? texts.breakTime : texts.focusTime;
-                    
-                    new Notification("Focus Flow", { 
-                        body: `${msg} (${timeStr})`, 
-                        icon: "favicon.svg",
-                        tag: `focus-timer-${Date.now()}` // Unique tag to ensure notification always appears
-                    });
-                }
             }
         }
         window.app = new PomodoroApp(); 
